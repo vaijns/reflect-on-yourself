@@ -8,6 +8,8 @@
 #include <variant>
 #include "../include/reflect-on-yourself/type_info.hpp"
 
+#define SQL_ACCESSOR(name) template<typename T> struct accessor_ ## name { T name ; }
+
 struct group{
 	std::uint64_t id;
 	std::string name;
@@ -22,6 +24,23 @@ struct user{
 	bool is_verified;
 };
 
+namespace accessors{
+	SQL_ACCESSOR(id);
+	SQL_ACCESSOR(name);
+	SQL_ACCESSOR(description);
+	SQL_ACCESSOR(email);
+	SQL_ACCESSOR(password);
+	SQL_ACCESSOR(is_verified);
+}
+
+template<roy::util::basic_string_literal ColumnName, template<typename> typename Accessor>
+struct sql_field{
+	static constexpr auto column_name = ColumnName;
+
+	template<typename T>
+	using accessor = Accessor<T>;
+};
+
 template<bool TestValue>
 struct test_type{
 	static constexpr bool test_value = TestValue;
@@ -31,9 +50,9 @@ namespace roy{
 	template<> struct type_info_for<group>
 		: roy::type_info_provider<group, roy::type_info<group, "group",
 			roy::util::type_wrapper<
-				roy::field<&group::id, "id">,
-				roy::field<&group::name, "name">,
-				roy::field<&group::description, "description">
+				roy::field<&group::id, "id">::extend<sql_field<"ID", accessors::accessor_id>>,
+				roy::field<&group::name, "name">::extend<sql_field<"Name", accessors::accessor_name>>,
+				roy::field<&group::description, "description">::extend<sql_field<"Description", accessors::accessor_description>>
 			>
 		>::extend<test_type<false>>
 	>{};
@@ -41,11 +60,11 @@ namespace roy{
 		: roy::type_info_provider<user, roy::type_info<user, "user",
 			roy::util::type_wrapper<
 				roy::field<&user::user_group, "group">,
-				roy::field<&user::id, "id">,
-				roy::field<&user::email, "email">,
-				roy::field<&user::name, "name">,
-				roy::field<&user::password, "password">,
-				roy::field<&user::is_verified, "is_verified">
+				roy::field<&user::id, "id">::extend<sql_field<"ID", accessors::accessor_id>>,
+				roy::field<&user::email, "email">::extend<sql_field<"EMail", accessors::accessor_email>>,
+				roy::field<&user::name, "name">::extend<sql_field<"Name", accessors::accessor_name>>,
+				roy::field<&user::password, "password">::extend<sql_field<"Password", accessors::accessor_password>>,
+				roy::field<&user::is_verified, "is_verified">::extend<sql_field<"IsVerified", accessors::accessor_is_verified>>
 			>
 		>::alias<"testing">::fields::template alias<&user::email, "e_mail">::extend<test_type<true>>
 	>{};
@@ -129,4 +148,10 @@ int main(){
 
 	std::cout << (roy::type_info_for_t<user>::extensions::test_value ? "true" : "false") << "\n";
 	std::cout << (roy::type_info_for_t<group>::extensions::test_value ? "true" : "false") << "\n";
+	std::cout << roy::type_info_for_t<user>::fields::nth_type<1>::extensions::column_name << "\n";
+
+	using accessor = roy::type_info_for_t<user>::fields::nth_type<1>::extensions::accessor<int>;
+	accessor a{};
+
+	a.id = 5;
 }
