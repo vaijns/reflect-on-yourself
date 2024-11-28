@@ -8,36 +8,142 @@
 #include <vector>
 #include <array>
 #include <string_view>
+#include <variant>
+#include <unordered_map>
 #include <utility>
+#include <tuple>
 #include <type_traits>
 #include "./util.hpp"
 #include "./field.hpp"
 
 namespace roy{
-	enum struct type_info_flags{
-		none = 0,
-		is_fundamental = 1 << 0,
-	};
+	template<auto Searched, auto Check, std::size_t Index>
+	static consteval bool check(){
+		using from = std::remove_cvref_t<decltype(Check)>;
+		using to = std::remove_cvref_t<decltype(Searched)>;
 
-	template<typename T, util::basic_string_literal Name, typename... Fields>
-	struct type_info{
+		if constexpr(!std::is_convertible_v<from, to>)
+			return false;
+		else
+			return static_cast<decltype(Searched)>(Check) == Searched;
+	}
+
+	template<auto Searched, auto... Rest, std::size_t... Is>
+	static consteval std::size_t find_index_of(std::index_sequence<Is...>){
+		static_assert((check<Searched, Rest, Is>() || ...));
+
+		std::size_t index{0};
+		([&](){
+			if constexpr(check<Searched, Rest, Is>())
+				index = Is;
+		}(), ...);
+
+		return index;
+	}
+
+	template<
+		typename T,
+		util::basic_string_literal Name,
+		typename UFields = util::type_wrapper<>,
+		typename VFunctions = util::type_wrapper<>,
+		typename WExtensions = util::type_wrapper<>
+	> struct type_info;
+
+	template<
+		typename T,
+		util::basic_string_literal Name,
+		typename... UFields,
+		typename... VFunctions,
+		typename... WExtensions
+	> struct type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>{
+		static_assert((field_type_of<UFields, T> && ...), "All field pointers must be members of the type_info type T");
+
+		using type_info_type = type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>;
+
 		using type = T;
 		static constexpr auto name = Name;
 
 		struct fields{
 			static constexpr std::size_t size(){
-				return sizeof...(Fields);
+				return sizeof...(UFields);
 			}
+
 			template<std::size_t N>
-			using nth_type = util::nth_type_of_t<N, Fields...>;
+				requires(N < sizeof...(UFields))
+			using nth_type = util::nth_type_of_t<N, UFields...>;
+
+			template<std::size_t Index, util::basic_string_literal FieldAliasName>
+				requires(Index < sizeof...(UFields))
+			using alias_nth = type_info<
+				T,
+				Name,
+				typename util::replace_nth_type_t<
+					Index,
+					util::type_wrapper<UFields...>,
+					typename nth_type<Index>::template alias<FieldAliasName>
+				>,
+				typename util::type_wrapper<VFunctions...>,
+				typename util::type_wrapper<WExtensions...>
+			>;
+
+			template<auto FieldPtr>
+				requires(util::member_field_pointer_of<FieldPtr, T>)
+			static constexpr std::size_t index_of = find_index_of<FieldPtr, UFields::pointer...>(std::make_index_sequence<sizeof...(UFields)>{});
+
+			template<auto FieldPtr, util::basic_string_literal FieldAliasName>
+				requires(util::member_field_pointer_of<FieldPtr, T>)
+			using alias = type_info_type::fields::template alias_nth<type_info_type::fields::template index_of<FieldPtr>, FieldAliasName>;
 		};
-		/*struct functions{
-			constexpr std::size_t size(){
-				return sizeof...(Functions);
+
+		struct functions{
+			static constexpr std::size_t size(){
+				return sizeof...(VFunctions);
 			}
+
 			template<std::size_t N>
-			using nth_type = util::nth_type_of_t<N, Functions...>;
-		};*/
+				requires(N < sizeof...(VFunctions))
+			using nth_type = util::nth_type_of_t<N, VFunctions...>;
+
+			template<std::size_t Index, util::basic_string_literal FunctionAliasName>
+				requires(Index < sizeof...(VFunctions))
+			using alias_nth = type_info<
+				T,
+				Name,
+				typename util::type_wrapper<UFields...>,
+				typename util::replace_nth_type_t<
+					Index,
+					util::type_wrapper<VFunctions...>,
+					typename nth_type<Index>::template alias<FunctionAliasName>
+				>,
+				typename util::type_wrapper<WExtensions...>
+			>;
+
+			template<auto FunctionPtr>
+				requires(util::member_function_pointer_of<FunctionPtr, T>)
+			static constexpr std::size_t index_of = find_index_of<FunctionPtr, VFunctions::pointer...>(std::make_index_sequence<sizeof...(VFunctions)>{});
+
+			template<auto FunctionPtr, util::basic_string_literal FunctionAliasName>
+				requires(util::member_function_pointer_of<FunctionPtr, T>)
+			using alias = type_info_type::functions::template alias_nth<type_info_type::functions::template index_of<FunctionPtr>, FunctionAliasName>;
+		};
+
+		struct extensions : WExtensions...{};
+
+		template<typename TExtension>
+		using extend = type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions..., TExtension>>;
+
+		template<util::basic_string_literal AliasName>
+		using alias = type_info<T, AliasName, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>;
+	};
+
+	template<
+		typename T,
+		util::basic_string_literal Name,
+		template<typename...> typename UWrapper, typename... UFields,
+		template<typename...> typename VWrapper, typename... VFunctions,
+		template<typename...> typename WWrapper, typename... WExtensions
+	> struct type_info<T, Name, UWrapper<UFields...>, VWrapper<VFunctions...>, WWrapper<WExtensions...>>
+		: type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>{
 	};
 
 	template<typename T>
@@ -61,8 +167,10 @@ namespace roy{
 				return 0;
 			}
 		};
-		static constexpr type_info_flags flags{
-			type_info_flags::is_fundamental
+		struct functions{
+			static constexpr std::size_t size(){
+				return 0;
+			}
 		};
 	};
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <string_view>
+#include <variant>
 #include "../include/reflect-on-yourself/type_info.hpp"
 
 struct group{
@@ -24,20 +25,24 @@ struct user{
 namespace roy{
 	template<> struct type_info_for<group>
 		: roy::type_info_provider<group, roy::type_info<group, "group",
-			roy::field<&group::id, "id">,
-			roy::field<&group::name, "name">,
-			roy::field<&group::description, "description">
+			roy::util::type_wrapper<
+				roy::field<&group::id, "id">,
+				roy::field<&group::name, "name">,
+				roy::field<&group::description, "description">
+			>
 		>
 	>{};
 	template<> struct type_info_for<user>
 		: roy::type_info_provider<user, roy::type_info<user, "user",
-			roy::field<&user::user_group, "group">,
-			roy::field<&user::id, "id">,
-			roy::field<&user::email, "email">,
-			roy::field<&user::name, "name">,
-			roy::field<&user::password, "password">,
-			roy::field<&user::is_verified, "is_verified">
-		>
+			roy::util::type_wrapper<
+				roy::field<&user::user_group, "group">,
+				roy::field<&group::id, "id">,
+				roy::field<&user::email, "email">,
+				roy::field<&user::name, "name">,
+				roy::field<&user::password, "password">,
+				roy::field<&user::is_verified, "is_verified">
+			>
+		>::alias<"testing">::fields::template alias<&user::email, "e_mail">
 	>{};
 }
 
@@ -65,18 +70,19 @@ void print(const T& t);
 
 template<typename T, typename Obj, std::size_t... Is>
 void print_type(const Obj& obj, std::index_sequence<Is...>, const std::string& prefix){
-	(print_field<typename T::fields::template nth_type<Is>>(obj, prefix), ...);
+	(print_field<std::remove_cvref_t<typename T::fields::template nth_type<Is>>>(obj, prefix), ...);
 }
 
 template<typename T, typename Obj>
 void print_field(const Obj& obj, const std::string& prefix){
 	using type_info = roy::type_info_for_t<typename T::type>;
+	std::cout << prefix << "(" << type_info::name << ") " << T::name.data() << " = ";
+
 	if constexpr(type_info::fields::size() == 0){
-		std::cout << prefix << "(" << type_info::name.data() << ") " << T::name.data() << " = ";
 		print_value(obj.*T::pointer);
 		std::cout << "\n";
 	} else{
-		std::cout << prefix << "(" << type_info::name.data() << ") " << T::name.data() << " = {\n";
+		std::cout << "{\n";
 		print_type<type_info>((obj.*T::pointer), std::make_index_sequence<type_info::fields::size()>{}, prefix + '\t');
 		std::cout << prefix << "}\n";
 	}
@@ -105,14 +111,14 @@ int main(){
 	});
 	print(user{
 		.user_group = {
-			.id = 2,
-			.name = "my_group",
+			.id = 5,
+			.name = "other_group",
 			.description = "yep"
 		},
-		.id = 3,
-		.email = "hello@world.com",
-		.name = "my_name",
-		.password = "my_password",
-		.is_verified = true
+		.id = 7,
+		.email = "goodbye@everyone.com",
+		.name = "other_name",
+		.password = "pw",
+		.is_verified = false
 	});
 }

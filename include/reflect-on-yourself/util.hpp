@@ -41,4 +41,10 @@
 #include "./util/pointer_type_of_member_function_pointer_type.hpp"
 #include "./util/type_of_member_pointer.hpp"
 #include "./util/type_of_member_pointer_type.hpp"
+#include "./util/replace_nth_type.hpp"
+#include "./util/type_wrapper.hpp"
+#include "./util/is_member_field_pointer_of.hpp"
+#include "./util/is_member_field_pointer_type_of.hpp"
+#include "./util/is_member_function_pointer_of.hpp"
+#include "./util/is_member_function_pointer_type_of.hpp"
 #endif
