@@ -8,7 +8,7 @@
 #include <string_view>
 
 namespace roy::util{
-	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
+	template<typename CharT, std::size_t N, typename Traits = std::char_traits<CharT>>
 	struct basic_string_literal{
 		using traits_type = Traits;
 		using value_type = CharT;
@@ -93,10 +93,10 @@ namespace roy::util{
 		}
 
 		template<size_type Pos = 0, size_type Count = length>
-		constexpr basic_string_literal<Count + 1, value_type, traits_type> substr() const noexcept{
+		constexpr basic_string_literal<value_type, Count + 1, traits_type> substr() const noexcept{
 			std::array<char, Count + 1> substring{};
 			std::copy_n(&value[Pos], Count, substring.data());
-			return basic_string_literal<Count + 1, value_type, traits_type>{substring};
+			return basic_string_literal<value_type, Count + 1, traits_type>{substring};
 		}
 
 		constexpr std::basic_string_view<value_type, traits_type> substr(size_type pos, size_type count = length) const noexcept{
@@ -144,65 +144,65 @@ namespace roy::util{
 		value_type value[N]{};
 	};
 
-	template<std::size_t N> using string_literal = basic_string_literal<N, char>;
-	template<std::size_t N> using wstring_literal = basic_string_literal<N, wchar_t>;
-	template<std::size_t N> using u8string_literal = basic_string_literal<N, char8_t>;
-	template<std::size_t N> using u16string_literal = basic_string_literal<N, char16_t>;
-	template<std::size_t N> using u32string_literal = basic_string_literal<N, char32_t>;
+	template<std::size_t N> using string_literal = basic_string_literal<char, N>;
+	template<std::size_t N> using wstring_literal = basic_string_literal<wchar_t, N>;
+	template<std::size_t N> using u8string_literal = basic_string_literal<char8_t, N>;
+	template<std::size_t N> using u16string_literal = basic_string_literal<char16_t, N>;
+	template<std::size_t N> using u32string_literal = basic_string_literal<char32_t, N>;
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& stream, const basic_string_literal<N, CharT, Traits>& str){
+	constexpr std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& stream, const basic_string_literal<CharT, N, Traits>& str){
 		stream << str.value;
 		return stream;
 	}
 
 	template<std::size_t NA, std::size_t NB, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<NA + NB - 1, CharT, Traits> operator+(const basic_string_literal<NA, CharT, Traits>& a, const basic_string_literal<NB, CharT, Traits>& b) noexcept{
+	constexpr basic_string_literal<CharT, NA + NB - 1, Traits> operator+(const basic_string_literal<CharT, NA, Traits>& a, const basic_string_literal<CharT, NB, Traits>& b) noexcept{
 		std::array<CharT, NA + NB - 1> new_value{};
 		std::copy_n(a.value, NA - 1, new_value.data());
 		std::copy_n(b.value, NB, new_value.data() + NA - 1);
 
-		return basic_string_literal<NA + NB - 1, CharT, Traits>{new_value};
+		return basic_string_literal<CharT, NA + NB - 1, Traits>{new_value};
 	}
 
 	template<std::size_t NA, std::size_t NB, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<NA + NB - 1, CharT, Traits> operator+(const CharT(&a)[NA], const basic_string_literal<NB, CharT, Traits>& b) noexcept{
+	constexpr basic_string_literal<CharT, NA + NB - 1, Traits> operator+(const CharT(&a)[NA], const basic_string_literal<CharT, NB, Traits>& b) noexcept{
 		std::array<CharT, NA + NB - 1> new_value{};
 		std::copy_n(a, NA - 1, new_value.data());
 		std::copy_n(b.value, NB, new_value.data() + NA - 1);
 
-		return basic_string_literal<NA + NB - 1, CharT, Traits>{new_value};
+		return basic_string_literal<CharT, NA + NB - 1, Traits>{new_value};
 	}
 
 	template<std::size_t NA, std::size_t NB, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<NA + NB - 1, CharT, Traits> operator+(const basic_string_literal<NA, CharT, Traits>& a, const CharT(&b)[NB]) noexcept{
+	constexpr basic_string_literal<CharT, NA + NB - 1, Traits> operator+(const basic_string_literal<CharT, NA, Traits>& a, const CharT(&b)[NB]) noexcept{
 		std::array<CharT, NA + NB - 1> new_value{};
 		std::copy_n(a.value, NA - 1, new_value.data());
 		std::copy_n(b, NB, new_value.data() + NA - 1);
 
-		return basic_string_literal<NA + NB - 1, CharT, Traits>{new_value};
+		return basic_string_literal<CharT, NA + NB - 1, Traits>{new_value};
 	}
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<N + 1, CharT, Traits> operator+(CharT ch, const basic_string_literal<N, CharT, Traits>& b) noexcept{
+	constexpr basic_string_literal<CharT, N + 1, Traits> operator+(CharT ch, const basic_string_literal<CharT, N, Traits>& b) noexcept{
 		std::array<CharT, N + 1> new_value{};
 		new_value[0] = ch;
 		std::copy_n(b.value, N, new_value.data() + 1);
 
-		return basic_string_literal<N + 1, CharT, Traits>{new_value};
+		return basic_string_literal<CharT, N + 1, Traits>{new_value};
 	}
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<N + 1, CharT, Traits> operator+(const basic_string_literal<N, CharT, Traits>& a, CharT ch) noexcept{
+	constexpr basic_string_literal<CharT, N + 1, Traits> operator+(const basic_string_literal<CharT, N, Traits>& a, CharT ch) noexcept{
 		std::array<CharT, N + 1> new_value{};
 		std::copy_n(a.value, N - 1, new_value.data());
 		new_value[N - 1] = ch;
 		new_value[N] = a.value[N - 1];
 
-		return basic_string_literal<N + 1, CharT, Traits>{new_value};
+		return basic_string_literal<CharT, N + 1, Traits>{new_value};
 	}
 
 	template<std::size_t N, typename CharT>
-	basic_string_literal(const CharT(&str)[N]) -> basic_string_literal<N, CharT, std::char_traits<CharT>>;
+	basic_string_literal(const CharT(&str)[N]) -> basic_string_literal<CharT, N, std::char_traits<CharT>>;
 }
 #endif
