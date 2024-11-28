@@ -85,12 +85,14 @@ namespace roy{
 		: fundamental_type_info_provider<std::uint32_t, "uint32">{};
 	template<> struct type_info_for<std::uint64_t>
 		: fundamental_type_info_provider<std::uint64_t, "uint64">{};
+#ifdef __SIZEOF_UINT128__
 	//template<> struct type_info_for<std::uint128_t>
 		//: fundamental_type_info_provider<std::uint128_t, "uint128">{};
 	//template<> struct type_info_for<__uint128_t>
 		//: fundamental_type_info_provider<__uint128_t, "uint128">{};
 	template<> struct type_info_for<unsigned __int128>
 		: fundamental_type_info_provider<unsigned __int128, "uint128">{};
+#endif
 
 	template<> struct type_info_for<std::int8_t>
 		: fundamental_type_info_provider<std::int8_t, "int8">{};
@@ -100,12 +102,14 @@ namespace roy{
 		: fundamental_type_info_provider<std::int32_t, "int32">{};
 	template<> struct type_info_for<std::int64_t>
 		: fundamental_type_info_provider<std::int64_t, "int64">{};
+#ifdef __SIZEOF_INT128__
 	//template<> struct type_info_for<std::int128_t>
 		//: fundamental_type_info_provider<std::int128_t, "int128">{};
 	//template<> struct type_info_for<__int128_t>
 		//: fundamental_type_info_provider<__int128_t, "int128">{};
 	template<> struct type_info_for<__int128_t>
 		: fundamental_type_info_provider<__int128_t, "int128">{};
+#endif
 
 	//template<> struct type_info_for<unsigned char>
 		//: fundamental_type_info_provider<unsigned char, "uchar">{};
