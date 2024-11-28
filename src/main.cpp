@@ -22,6 +22,11 @@ struct user{
 	bool is_verified;
 };
 
+template<bool TestValue>
+struct test_type{
+	static constexpr bool test_value = TestValue;
+};
+
 namespace roy{
 	template<> struct type_info_for<group>
 		: roy::type_info_provider<group, roy::type_info<group, "group",
@@ -30,7 +35,7 @@ namespace roy{
 				roy::field<&group::name, "name">,
 				roy::field<&group::description, "description">
 			>
-		>
+		>::extend<test_type<false>>
 	>{};
 	template<> struct type_info_for<user>
 		: roy::type_info_provider<user, roy::type_info<user, "user",
@@ -42,7 +47,7 @@ namespace roy{
 				roy::field<&user::password, "password">,
 				roy::field<&user::is_verified, "is_verified">
 			>
-		>::alias<"testing">::fields::template alias<&user::email, "e_mail">
+		>::alias<"testing">::fields::template alias<&user::email, "e_mail">::extend<test_type<true>>
 	>{};
 }
 
@@ -121,4 +126,7 @@ int main(){
 		.password = "pw",
 		.is_verified = false
 	});
+
+	std::cout << (roy::type_info_for_t<user>::extensions::test_value ? "true" : "false") << "\n";
+	std::cout << (roy::type_info_for_t<group>::extensions::test_value ? "true" : "false") << "\n";
 }
