@@ -4,7 +4,7 @@
 #include "./util.hpp"
 
 namespace roy{
-	template<auto FieldPtr, util::string_literal Name/*, typename FlagType, FlagType Flags*/>
+	template<auto FieldPtr, util::basic_string_literal Name/*, typename FlagType, FlagType Flags*/>
 		requires(util::member_field_pointer<FieldPtr>)
 	struct field{
 		using type = util::type_of_member_field_pointer_t<FieldPtr>;

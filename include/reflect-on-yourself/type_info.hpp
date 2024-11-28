@@ -19,7 +19,7 @@ namespace roy{
 		is_fundamental = 1 << 0,
 	};
 
-	template<typename T, util::string_literal Name, typename... Fields>
+	template<typename T, util::basic_string_literal Name, typename... Fields>
 	struct type_info{
 		using type = T;
 		static constexpr auto name = Name;
@@ -51,7 +51,7 @@ namespace roy{
 		using type = type_info;
 	};
 
-	template<typename T, util::string_literal Name>
+	template<typename T, util::basic_string_literal Name>
 	struct fundamental_type_info{
 		using type = T;
 		static constexpr auto name = Name;
@@ -66,7 +66,7 @@ namespace roy{
 		};
 	};
 
-	template<typename T, util::string_literal Name>
+	template<typename T, util::basic_string_literal Name>
 	struct fundamental_type_info_provider{
 		using type = fundamental_type_info<T, Name>;
 	};
