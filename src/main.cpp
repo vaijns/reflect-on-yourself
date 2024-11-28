@@ -36,7 +36,7 @@ namespace roy{
 		: roy::type_info_provider<user, roy::type_info<user, "user",
 			roy::util::type_wrapper<
 				roy::field<&user::user_group, "group">,
-				roy::field<&group::id, "id">,
+				roy::field<&user::id, "id">,
 				roy::field<&user::email, "email">,
 				roy::field<&user::name, "name">,
 				roy::field<&user::password, "password">,
