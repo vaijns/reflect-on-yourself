@@ -141,7 +141,7 @@ ReferenceAlignment: Left
 ReflowComments: true
 RemoveBracesLLVM: false
 #(clang20) RemoveEmptyLinesInUnwrappedLines: true
-RemoveParentheses: MultipleParentheses
+RemoveParentheses: Leave
 RemoveSemicolon: true
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope

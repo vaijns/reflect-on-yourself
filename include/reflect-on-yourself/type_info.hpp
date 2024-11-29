@@ -31,7 +31,7 @@ namespace roy {
 
 	template<auto Searched, auto... Rest, std::size_t... Is>
 	static consteval std::size_t find_index_of(std::index_sequence<Is...>) {
-		static_assert(check<Searched, Rest, Is>() || ...);
+		static_assert((check<Searched, Rest, Is>() || ...));
 
 		std::size_t index{0};
 		(
