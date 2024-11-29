@@ -33,17 +33,27 @@ namespace accessors{
 	SQL_ACCESSOR(is_verified);
 }
 
+struct sql_field_tag{};
 template<roy::util::basic_string_literal ColumnName, template<typename> typename Accessor>
 struct sql_field{
-	static constexpr auto column_name = ColumnName;
+	using tag = sql_field_tag;
 
-	template<typename T>
-	using accessor = Accessor<T>;
+	struct type{
+		static constexpr auto column_name = ColumnName;
+
+		template<typename T>
+		using accessor = Accessor<T>;
+	};
 };
 
+struct test_type_tag{};
 template<bool TestValue>
 struct test_type{
-	static constexpr bool test_value = TestValue;
+	using tag = test_type_tag;
+
+	struct type{
+		static constexpr bool test_value = TestValue;
+	};
 };
 
 namespace roy{
@@ -151,7 +161,15 @@ int main(){
 	std::cout << roy::type_info_for_t<user>::fields::nth_type<1>::extensions::column_name << "\n";
 
 	using accessor = roy::type_info_for_t<user>::fields::nth_type<1>::extensions::accessor<int>;
+	static_assert(roy::type_info_for_t<user>::fields::nth_type<1>::has_extension<sql_field_tag>);
+	static_assert(roy::type_info_for_t<user>::fields::nth_has_extension<sql_field_tag, 2>);
+	static_assert(not roy::type_info_for_t<user>::fields::nth_has_extension<test_type_tag, 2>);
+	static_assert(roy::type_info_for_t<user>::has_extension<test_type_tag>);
+	static_assert(roy::type_info_for_t<group>::has_extension<test_type_tag>);
+
 	accessor a{};
 
 	a.id = 5;
+
+	return a.id;
 }

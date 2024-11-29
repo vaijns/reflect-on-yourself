@@ -8,17 +8,24 @@ namespace roy{
 	template<auto FieldPtr, util::basic_string_literal Name, typename... TExtensions>
 		requires(util::member_field_pointer<FieldPtr>)
 	struct field{
+		using field_type = field<FieldPtr, Name, TExtensions...>;
+
 		using type = util::type_of_member_field_pointer_t<FieldPtr>;
 		static constexpr auto name = Name;
 		static constexpr auto pointer = FieldPtr;
 
-		struct extensions : TExtensions...{};
+		struct extensions : TExtensions::type...{
+			using tag_list = util::type_wrapper<typename TExtensions::tag...>;
+		};
 
 		template<typename TExtension>
 		using extend = field<FieldPtr, Name, TExtensions..., TExtension>;
 
 		template<util::basic_string_literal AliasName>
 		using alias = field<FieldPtr, AliasName, TExtensions...>;
+
+		template<typename TExtensionTag>
+		static constexpr bool has_extension = util::tag_type<field_type::extensions, TExtensionTag>;
 	};
 
 	template<typename TField>

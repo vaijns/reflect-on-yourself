@@ -47,4 +47,9 @@
 #include "./util/is_member_field_pointer_type_of.hpp"
 #include "./util/is_member_function_pointer_of.hpp"
 #include "./util/is_member_function_pointer_type_of.hpp"
+#include "./util/filter_missing_type.hpp"
+#include "./util/has_tags.hpp"
+#include "./util/has_tag_type.hpp"
+#include "./util/type_count.hpp"
+#include "./util/contains_type.hpp"
 #endif

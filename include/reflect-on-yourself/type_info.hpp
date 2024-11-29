@@ -63,6 +63,10 @@ namespace roy{
 		using type = T;
 		static constexpr auto name = Name;
 
+		struct extensions : WExtensions::type...{
+			using tag_list = util::type_wrapper<typename WExtensions::tag...>;
+		};
+
 		struct fields{
 			static constexpr std::size_t size(){
 				return sizeof...(UFields);
@@ -70,7 +74,7 @@ namespace roy{
 
 			template<std::size_t N>
 				requires(N < sizeof...(UFields))
-			using nth_type = util::nth_type_of_t<N, UFields...>;
+			using nth_type = util::nth_type_of_t<N, util::type_wrapper<UFields...>>;
 
 			template<std::size_t Index, util::basic_string_literal FieldAliasName>
 				requires(Index < sizeof...(UFields))
@@ -93,6 +97,22 @@ namespace roy{
 			template<auto FieldPtr, util::basic_string_literal FieldAliasName>
 				requires(util::member_field_pointer_of<FieldPtr, T>)
 			using alias = type_info_type::fields::template alias_nth<type_info_type::fields::template index_of<FieldPtr>, FieldAliasName>;
+
+			template<typename TExtensionTag>
+			static constexpr std::size_t size_with_extension(){
+				return util::type_count_v<util::filter_missing_tag_type_t<TExtensionTag, util::type_wrapper<UFields...>>>;
+			}
+
+			template<typename TExtensionTag, std::size_t N>
+				requires(N < sizeof...(UFields))
+			static constexpr bool nth_has_extension = nth_type<N>::template has_extension<TExtensionTag>;
+
+			template<typename TExtensionTag, auto FieldPtr>
+				requires(util::member_field_pointer_of<FieldPtr, T>)
+			static constexpr bool has_extension = nth_type<index_of<FieldPtr>>::template has_extension<TExtensionTag>;
+
+			template<typename TExtensionTag, std::size_t N>
+			using nth_type_with_extension = util::nth_type_of_t<N, util::filter_missing_tag_type_t<TExtensionTag, util::type_wrapper<UFields...>>>;
 		};
 
 		struct functions{
@@ -102,7 +122,7 @@ namespace roy{
 
 			template<std::size_t N>
 				requires(N < sizeof...(VFunctions))
-			using nth_type = util::nth_type_of_t<N, VFunctions...>;
+			using nth_type = util::nth_type_of_t<N, util::type_wrapper<VFunctions...>>;
 
 			template<std::size_t Index, util::basic_string_literal FunctionAliasName>
 				requires(Index < sizeof...(VFunctions))
@@ -124,16 +144,33 @@ namespace roy{
 
 			template<auto FunctionPtr, util::basic_string_literal FunctionAliasName>
 				requires(util::member_function_pointer_of<FunctionPtr, T>)
-			using alias = type_info_type::functions::template alias_nth<type_info_type::functions::template index_of<FunctionPtr>, FunctionAliasName>;
-		};
+			using alias = type_info_type::functions::template alias_nth<index_of<FunctionPtr>, FunctionAliasName>;
 
-		struct extensions : WExtensions...{};
+			template<typename TExtensionTag>
+			static constexpr std::size_t size_with_extension(){
+				return util::type_count_v<util::filter_missing_tag_type_t<TExtensionTag, util::type_wrapper<VFunctions...>>>;
+			}
+
+			template<typename TExtensionTag, std::size_t N>
+				requires(N < sizeof...(VFunctions))
+			static constexpr bool nth_has_extension = nth_type<N>::template has_extension<TExtensionTag>;
+
+			template<typename TExtensionTag, auto FunctionPtr>
+				requires(util::member_function_pointer_of<FunctionPtr, T>)
+			static constexpr bool has_extension = nth_type<index_of<FunctionPtr>>::template has_extension<TExtensionTag>;
+
+			template<typename TExtensionTag, std::size_t N>
+			using nth_type_with_extension = util::nth_type_of_t<N, util::filter_missing_tag_type_t<TExtensionTag, util::type_wrapper<VFunctions...>>>;
+		};
 
 		template<typename TExtension>
 		using extend = type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions..., TExtension>>;
 
 		template<util::basic_string_literal AliasName>
 		using alias = type_info<T, AliasName, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>;
+
+		template<typename TExtensionTag>
+		static constexpr bool has_extension = util::tag_type<type_info_type::extensions, TExtensionTag>;
 	};
 
 	template<

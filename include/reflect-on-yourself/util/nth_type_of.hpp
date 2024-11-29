@@ -22,10 +22,13 @@ namespace roy::util{
 			: nth_type_of_impl<CurrentIndex + 1, SearchedIndex, Ts...>{};
 	}
 
-	template<std::size_t Index, typename... Ts>
-	struct nth_type_of : detail::nth_type_of_impl<0, Index, Ts...>{};
+	template<std::size_t Index, typename T>
+	struct nth_type_of;
 
-	template<std::size_t Index, typename... Ts>
-	using nth_type_of_t = nth_type_of<Index, Ts...>::type;
+	template<std::size_t Index, template<typename...> typename TWrapper, typename... Ts>
+	struct nth_type_of<Index, TWrapper<Ts...>> : detail::nth_type_of_impl<0, Index, Ts...>{};
+
+	template<std::size_t Index, typename T>
+	using nth_type_of_t = nth_type_of<Index, T>::type;
 }
 #endif
