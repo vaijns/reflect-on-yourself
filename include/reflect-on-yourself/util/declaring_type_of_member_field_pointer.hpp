@@ -3,17 +3,17 @@
 
 #include "./is_member_field_pointer.hpp"
 
-namespace roy::util{
+namespace roy::util {
 	template<auto Ptr>
 	struct declaring_type_of_member_field_pointer;
 
 	template<typename TType, typename UDeclaringType, TType UDeclaringType::* Ptr>
 		requires(member_field_pointer<Ptr>)
-	struct declaring_type_of_member_field_pointer<Ptr>{
+	struct declaring_type_of_member_field_pointer<Ptr> {
 		using type = UDeclaringType;
 	};
 
 	template<auto Ptr>
 	using declaring_type_of_member_field_pointer_t = declaring_type_of_member_field_pointer<Ptr>::type;
-}
+} // namespace roy::util
 #endif

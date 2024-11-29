@@ -3,17 +3,17 @@
 
 #include "./is_function_pointer.hpp"
 
-namespace roy::util{
+namespace roy::util {
 	template<auto Ptr>
 	struct return_type_of_function_pointer;
 
 	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
 		requires(function_pointer<Ptr>)
-	struct return_type_of_function_pointer<Ptr>{
+	struct return_type_of_function_pointer<Ptr> {
 		using type = TType;
 	};
 
 	template<auto Ptr>
 	using return_type_of_function_pointer_t = return_type_of_function_pointer<Ptr>::type;
-}
+} // namespace roy::util
 #endif

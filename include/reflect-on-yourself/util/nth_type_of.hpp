@@ -3,8 +3,8 @@
 
 #include <cstddef>
 
-namespace roy::util{
-	namespace detail{
+namespace roy::util {
+	namespace detail {
 		template<std::size_t CurrentIndex, std::size_t SearchedIndex, typename... Ts>
 		concept searched_index_in_range = (SearchedIndex < (CurrentIndex + sizeof...(Ts)));
 
@@ -12,23 +12,23 @@ namespace roy::util{
 		struct nth_type_of_impl;
 
 		template<std::size_t Index, typename T, typename... Ts>
-		struct nth_type_of_impl<Index, Index, T, Ts...>{
+		struct nth_type_of_impl<Index, Index, T, Ts...> {
 			using type = T;
 		};
 
 		template<std::size_t CurrentIndex, std::size_t SearchedIndex, typename T, typename... Ts>
 			requires(searched_index_in_range<CurrentIndex, SearchedIndex, T, Ts...>)
 		struct nth_type_of_impl<CurrentIndex, SearchedIndex, T, Ts...>
-			: nth_type_of_impl<CurrentIndex + 1, SearchedIndex, Ts...>{};
-	}
+			: nth_type_of_impl<CurrentIndex + 1, SearchedIndex, Ts...> { };
+	} // namespace detail
 
 	template<std::size_t Index, typename T>
 	struct nth_type_of;
 
 	template<std::size_t Index, template<typename...> typename TWrapper, typename... Ts>
-	struct nth_type_of<Index, TWrapper<Ts...>> : detail::nth_type_of_impl<0, Index, Ts...>{};
+	struct nth_type_of<Index, TWrapper<Ts...>> : detail::nth_type_of_impl<0, Index, Ts...> { };
 
 	template<std::size_t Index, typename T>
 	using nth_type_of_t = nth_type_of<Index, T>::type;
-}
+} // namespace roy::util
 #endif

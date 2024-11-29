@@ -2,20 +2,20 @@
 #define H_REFLECT_ON_YOURSELF_UTIL_NTH_PARAM_TYPE_OF_FUNCTION_POINTER_TYPE
 
 #include "./is_function_pointer_type.hpp"
-#include "./type_wrapper.hpp"
 #include "./nth_type_of.hpp"
+#include "./type_wrapper.hpp"
 
-namespace roy::util{
+namespace roy::util {
 	template<std::size_t Index, typename T>
 	struct nth_param_type_of_function_pointer_type;
 
 	template<std::size_t Index, typename TType, typename... VParamTypes>
 		requires(function_pointer_type<TType (*)(VParamTypes...)>)
-	struct nth_param_type_of_function_pointer_type<Index, TType (*)(VParamTypes...)>{
+	struct nth_param_type_of_function_pointer_type<Index, TType (*)(VParamTypes...)> {
 		using type = nth_type_of_t<Index, util::type_wrapper<VParamTypes...>>;
 	};
 
 	template<std::size_t Index, typename T>
 	using nth_param_type_of_function_pointer_type_t = nth_param_type_of_function_pointer_type<Index, T>::type;
-}
+} // namespace roy::util
 #endif

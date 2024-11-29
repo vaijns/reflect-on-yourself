@@ -3,17 +3,17 @@
 
 #include "./is_function_pointer_type.hpp"
 
-namespace roy::util{
+namespace roy::util {
 	template<typename T>
 	struct pointer_type_of_function_pointer_type;
 
 	template<typename TType, typename... VParamTypes>
 		requires(function_pointer_type<TType (*)(VParamTypes...)>)
-	struct pointer_type_of_function_pointer_type<TType (*)(VParamTypes...)>{
+	struct pointer_type_of_function_pointer_type<TType (*)(VParamTypes...)> {
 		using type = TType (*)(VParamTypes...);
 	};
 
 	template<typename T>
 	using pointer_type_of_function_pointer_type_t = pointer_type_of_function_pointer_type<T>::type;
-}
+} // namespace roy::util
 #endif
