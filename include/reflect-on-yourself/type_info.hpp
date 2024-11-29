@@ -193,6 +193,23 @@ namespace roy{
 	template<typename T>
 	using type_info_for_t = type_info_for<T>::type;
 
+	template<typename T>
+	concept with_type_info = requires{
+		typename type_info_for_t<T>;
+	};
+
+	template<typename T>
+	struct is_type_info : std::false_type{};
+
+	template<typename T, util::basic_string_literal Name, typename UFields, typename VFunctions, typename WExtensions>
+	struct is_type_info<type_info<T, Name, UFields, VFunctions, WExtensions>> : std::true_type{};
+
+	template<typename T>
+	inline constexpr bool is_type_info_v = is_type_info<T>::value;
+
+	template<typename T>
+	concept type_info_type = is_type_info_v<T>;
+
 	template<typename T, typename type_info>
 	struct type_info_provider{
 		using type = type_info;
