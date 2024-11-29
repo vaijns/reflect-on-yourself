@@ -68,6 +68,8 @@ namespace roy{
 		};
 
 		struct fields{
+			using list = util::type_wrapper<UFields...>;
+
 			static constexpr std::size_t size(){
 				return sizeof...(UFields);
 			}
@@ -116,6 +118,8 @@ namespace roy{
 		};
 
 		struct functions{
+			using list = util::type_wrapper<VFunctions...>;
+
 			static constexpr std::size_t size(){
 				return sizeof...(VFunctions);
 			}
