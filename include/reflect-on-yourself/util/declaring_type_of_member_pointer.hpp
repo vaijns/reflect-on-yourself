@@ -13,7 +13,7 @@ namespace roy::util {
 		using type = UDeclaringType;
 	};
 
-	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
+	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::*Ptr)(VParamTypes...)>
 		requires(member_pointer<Ptr>)
 	struct declaring_type_of_member_pointer<Ptr> {
 		using type = UDeclaringType;

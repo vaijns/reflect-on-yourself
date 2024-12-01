@@ -174,14 +174,11 @@ namespace roy {
 	template<
 		typename T,
 		util::basic_string_literal Name,
-		template<typename...>
-		typename UWrapper,
+		template<typename...> typename UWrapper,
 		typename... UFields,
-		template<typename...>
-		typename VWrapper,
+		template<typename...> typename VWrapper,
 		typename... VFunctions,
-		template<typename...>
-		typename WWrapper,
+		template<typename...> typename WWrapper,
 		typename... WExtensions>
 	struct type_info<T, Name, UWrapper<UFields...>, VWrapper<VFunctions...>, WWrapper<WExtensions...>>
 		: type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>> {

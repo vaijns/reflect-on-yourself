@@ -9,7 +9,7 @@ namespace roy::util {
 	template<std::size_t Index, auto Ptr>
 	struct nth_param_type_of_member_function_pointer;
 
-	template<std::size_t Index, typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
+	template<std::size_t Index, typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::*Ptr)(VParamTypes...)>
 		requires(member_function_pointer<Ptr>)
 	struct nth_param_type_of_member_function_pointer<Index, Ptr> {
 		using type = nth_type_of_t<Index, util::type_wrapper<VParamTypes...>>;

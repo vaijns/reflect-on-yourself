@@ -62,13 +62,13 @@ namespace roy {
 } // namespace roy
 
 int main() {
-	std::cout << roy::json::serialize(user{
-		.user_group = {.member = {.some_field = "hehe"}, .id = 5, .name = "other_group", .description = std::nullopt},
-		.id = 7,
-		.email = "goodbye@everyone.com",
-		.name = "other_name",
-		.password = "pw",
-		.is_verified = false,
-		.other = {0.5, 0.1, 12.3, 5, 9}
-	});
+	std::cout << roy::json::serialize(
+		user{.user_group = {.member = {.some_field = "hehe"}, .id = 5, .name = "other_group", .description = std::nullopt},
+		     .id = 7,
+		     .email = "goodbye@everyone.com",
+		     .name = "other_name",
+		     .password = "pw",
+		     .is_verified = false,
+		     .other = {0.5, 0.1, 12.3, 5, 9}}
+	);
 }

@@ -21,7 +21,7 @@ AllowAllArgumentsOnNextLine: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowBreakBeforeNoexceptSpecifier: OnlyWithParen
 AllowShortBlocksOnASingleLine: Never
-#(clang19) AllowShortCaseExpressionOnASingleLine: true
+AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortCompoundRequirementOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
@@ -63,7 +63,7 @@ BreakBeforeBinaryOperators: None # TODO
 BreakBeforeConceptDeclarations: Always
 BreakBeforeInlineASMColon: OnlyMultiline
 BreakBeforeTernaryOperators: true
-#(clang20) BreakBinaryOperations: OnePerLine
+BreakBinaryOperations: OnePerLine
 BreakConstructorInitializers: BeforeColon
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: BeforeColon
@@ -103,16 +103,14 @@ IntegerLiteralSeparator:
   HexMinDigits: 0
 JavaScriptQuotes: Double
 JavaScriptWrapImports: true
-#(clang19) KeepEmptyLines:
-#  AtEndOfFile: false
-#  AtStartOfBlock: false
-#  AtStartOfFile: false
-KeepEmptyLinesAtEOF: false # TODO Remove for clang19
-KeepEmptyLinesAtTheStartOfBlocks: false # TODO Remove for clang19
-#(clang20) KeepFormFeed: false
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+KeepFormFeed: false
 LambdaBodyIndentation: Signature
 LineEnding: LF
-#(clang19) MainIncludeChar: Quote
+MainIncludeChar: Quote
 MaxEmptyLinesToKeep: 1 # TODO
 NamespaceIndentation: All
 ObjCBinPackProtocolList: Auto
@@ -140,8 +138,8 @@ QualifierOrder: [inline, static, constexpr, friend, const, restrict, volatile, t
 ReferenceAlignment: Left
 ReflowComments: true
 RemoveBracesLLVM: false
-#(clang20) RemoveEmptyLinesInUnwrappedLines: true
-RemoveParentheses: Leave
+RemoveEmptyLinesInUnwrappedLines: true
+RemoveParentheses: MultipleParentheses
 RemoveSemicolon: true
 RequiresClausePosition: OwnLine
 RequiresExpressionIndentation: OuterScope

@@ -9,7 +9,7 @@ namespace roy::util {
 	template<auto Ptr>
 	struct param_count_of_member_function_pointer;
 
-	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
+	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::*Ptr)(VParamTypes...)>
 		requires(member_function_pointer<Ptr>)
 	struct param_count_of_member_function_pointer<Ptr> {
 		static constexpr std::size_t value = sizeof...(VParamTypes);

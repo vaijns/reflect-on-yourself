@@ -7,7 +7,7 @@ namespace roy::util {
 	template<auto Ptr>
 	struct is_member_field_pointer : std::false_type { };
 
-	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
+	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::*Ptr)(VParamTypes...)>
 	struct is_member_field_pointer<Ptr> : std::false_type { };
 
 	template<typename TType, typename UDeclaringType, TType UDeclaringType::* Ptr>

@@ -7,7 +7,7 @@ namespace roy::util {
 	template<auto Ptr, typename TDeclaringType>
 	struct is_member_function_pointer_of : std::false_type { };
 
-	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
+	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::*Ptr)(VParamTypes...)>
 	struct is_member_function_pointer_of<Ptr, UDeclaringType> : std::true_type { };
 
 	template<auto Ptr, typename TDeclaringType>

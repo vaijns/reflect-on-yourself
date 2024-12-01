@@ -7,7 +7,7 @@ namespace roy::util {
 	template<auto Ptr>
 	struct pointer_type_of_member_function_pointer;
 
-	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::* Ptr)(VParamTypes...)>
+	template<typename TType, typename UDeclaringType, typename... VParamTypes, TType (UDeclaringType::*Ptr)(VParamTypes...)>
 		requires(member_function_pointer<Ptr>)
 	struct pointer_type_of_member_function_pointer<Ptr> {
 		using type = TType (*)(VParamTypes...);
