@@ -19,7 +19,7 @@
 
 namespace roy {
 	template<auto Searched, auto Check, std::size_t Index>
-	static consteval bool check() {
+	inline consteval bool check() {
 		using from = std::remove_cvref_t<decltype(Check)>;
 		using to = std::remove_cvref_t<decltype(Searched)>;
 
@@ -30,7 +30,7 @@ namespace roy {
 	}
 
 	template<auto Searched, auto... Rest, std::size_t... Is>
-	static consteval std::size_t find_index_of(std::index_sequence<Is...>) {
+	inline consteval std::size_t find_index_of(std::index_sequence<Is...>) {
 		static_assert((check<Searched, Rest, Is>() || ...));
 
 		std::size_t index{0};
@@ -45,12 +45,52 @@ namespace roy {
 		return index;
 	}
 
+	template<std::integral I, std::size_t N>
+	inline consteval I max(const std::array<I, N>& arr){
+		static_assert(N > 0);
+		I max_value{arr[0]};
+
+		for(std::size_t i = 0; i < N; ++i){
+			if(arr[i] > max_value)
+				max_value = arr[i];
+		}
+
+		return max_value;
+	}
+
+	template<typename T, typename... UFields>
+	inline consteval bool contains_all_fields_of(){
+		constexpr std::size_t type_size = sizeof(T);
+		constexpr std::size_t field_count = sizeof...(UFields);
+		constexpr std::array<std::size_t, field_count> field_sizes{sizeof(UFields)...};
+		constexpr std::array<std::size_t, field_count> field_alignments{std::alignment_of_v<UFields>...};
+		constexpr std::size_t max_alignment{max(field_alignments)};
+
+		std::size_t current_address_byte{0};
+		for(std::size_t i = 0; i < field_count; ++i){
+			std::size_t current_size{field_sizes[i]};
+			std::size_t current_alignment{field_alignments[i]};
+			std::size_t bytes_above_alignment{current_address_byte % current_alignment};
+			std::size_t required_padding{bytes_above_alignment > 0 ? current_alignment - bytes_above_alignment : 0};
+			current_address_byte += current_size + required_padding;
+		}
+		std::size_t bytes_above_alignment{current_address_byte % max_alignment};
+		std::size_t required_padding{bytes_above_alignment > 0 ? max_alignment - bytes_above_alignment : 0};
+
+		current_address_byte += required_padding;
+
+		return type_size == current_address_byte;
+	}
+
 	template<typename T, util::basic_inplace_string Name, typename UFields = util::type_wrapper<>, typename VFunctions = util::type_wrapper<>, typename WExtensions = util::type_wrapper<>>
 	struct type_info;
 
 	template<typename T, util::basic_inplace_string Name, typename... UFields, typename... VFunctions, typename... WExtensions>
 	struct type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>> {
 		static_assert((field_type_of<UFields, T> && ...), "All field pointers must be members of the type_info type T");
+		// TODO: this might most likely fail in cases like if the struct is packed, if it has an alignment specifier or if it has bit-fields
+		// can also return true in cases where it shouldn't
+		static_assert(contains_all_fields_of<T, typename UFields::type...>(), "there's most likely fields missing in the type_info definition.");
 
 		using type_info_type =
 			type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>;
