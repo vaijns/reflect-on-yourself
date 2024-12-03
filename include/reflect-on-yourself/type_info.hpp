@@ -45,10 +45,10 @@ namespace roy {
 		return index;
 	}
 
-	template<typename T, util::basic_string_literal Name, typename UFields = util::type_wrapper<>, typename VFunctions = util::type_wrapper<>, typename WExtensions = util::type_wrapper<>>
+	template<typename T, util::basic_inplace_string Name, typename UFields = util::type_wrapper<>, typename VFunctions = util::type_wrapper<>, typename WExtensions = util::type_wrapper<>>
 	struct type_info;
 
-	template<typename T, util::basic_string_literal Name, typename... UFields, typename... VFunctions, typename... WExtensions>
+	template<typename T, util::basic_inplace_string Name, typename... UFields, typename... VFunctions, typename... WExtensions>
 	struct type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>> {
 		static_assert((field_type_of<UFields, T> && ...), "All field pointers must be members of the type_info type T");
 
@@ -71,7 +71,7 @@ namespace roy {
 				requires(N < sizeof...(UFields))
 			using nth_type = util::nth_type_of_t<N, util::type_wrapper<UFields...>>;
 
-			template<std::size_t Index, util::basic_string_literal FieldAliasName>
+			template<std::size_t Index, util::basic_inplace_string FieldAliasName>
 				requires(Index < sizeof...(UFields))
 			using alias_nth = type_info<
 				T,
@@ -85,7 +85,7 @@ namespace roy {
 			static constexpr std::size_t index_of =
 				find_index_of<FieldPtr, UFields::pointer...>(std::make_index_sequence<sizeof...(UFields)>{});
 
-			template<auto FieldPtr, util::basic_string_literal FieldAliasName>
+			template<auto FieldPtr, util::basic_inplace_string FieldAliasName>
 				requires(util::member_field_pointer_of<FieldPtr, T>)
 			using alias = type_info_type::fields::
 				template alias_nth<type_info_type::fields::template index_of<FieldPtr>, FieldAliasName>;
@@ -119,7 +119,7 @@ namespace roy {
 				requires(N < sizeof...(VFunctions))
 			using nth_type = util::nth_type_of_t<N, util::type_wrapper<VFunctions...>>;
 
-			template<std::size_t Index, util::basic_string_literal FunctionAliasName>
+			template<std::size_t Index, util::basic_inplace_string FunctionAliasName>
 				requires(Index < sizeof...(VFunctions))
 			using alias_nth = type_info<
 				T,
@@ -134,7 +134,7 @@ namespace roy {
 				std::make_index_sequence<sizeof...(VFunctions)>{}
 			);
 
-			template<auto FunctionPtr, util::basic_string_literal FunctionAliasName>
+			template<auto FunctionPtr, util::basic_inplace_string FunctionAliasName>
 				requires(util::member_function_pointer_of<FunctionPtr, T>)
 			using alias =
 				type_info_type::functions::template alias_nth<index_of<FunctionPtr>, FunctionAliasName>;
@@ -163,7 +163,7 @@ namespace roy {
 		using extend =
 			type_info<T, Name, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions..., TExtension>>;
 
-		template<util::basic_string_literal AliasName>
+		template<util::basic_inplace_string AliasName>
 		using alias =
 			type_info<T, AliasName, util::type_wrapper<UFields...>, util::type_wrapper<VFunctions...>, util::type_wrapper<WExtensions...>>;
 
@@ -173,7 +173,7 @@ namespace roy {
 
 	template<
 		typename T,
-		util::basic_string_literal Name,
+		util::basic_inplace_string Name,
 		template<typename...> typename UWrapper,
 		typename... UFields,
 		template<typename...> typename VWrapper,
@@ -196,7 +196,7 @@ namespace roy {
 	template<typename T>
 	struct is_type_info : std::false_type { };
 
-	template<typename T, util::basic_string_literal Name, typename UFields, typename VFunctions, typename WExtensions>
+	template<typename T, util::basic_inplace_string Name, typename UFields, typename VFunctions, typename WExtensions>
 	struct is_type_info<type_info<T, Name, UFields, VFunctions, WExtensions>> : std::true_type { };
 
 	template<typename T>
@@ -210,7 +210,7 @@ namespace roy {
 		using type = type_info;
 	};
 
-	template<typename T, util::basic_string_literal Name>
+	template<typename T, util::basic_inplace_string Name>
 	struct fundamental_type_info {
 		using type = T;
 		static constexpr auto name = Name;
@@ -224,7 +224,7 @@ namespace roy {
 		};
 	};
 
-	template<typename T, util::basic_string_literal Name>
+	template<typename T, util::basic_inplace_string Name>
 	struct fundamental_type_info_provider {
 		using type = fundamental_type_info<T, Name>;
 	};

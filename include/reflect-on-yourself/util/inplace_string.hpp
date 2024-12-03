@@ -9,7 +9,7 @@
 
 namespace roy::util {
 	template<typename CharT, std::size_t N, typename Traits = std::char_traits<CharT>>
-	struct basic_string_literal {
+	struct basic_inplace_string {
 		using traits_type = Traits;
 		using value_type = CharT;
 		using size_type = std::size_t;
@@ -25,30 +25,30 @@ namespace roy::util {
 
 		static constexpr size_type length = N - 1;
 
-		constexpr basic_string_literal() noexcept { value[0] = '\0'; }
+		constexpr basic_inplace_string() noexcept { value[0] = '\0'; }
 
-		constexpr basic_string_literal(const CharT (&str)[N]) noexcept { std::copy_n(str, length, value); }
+		constexpr basic_inplace_string(const CharT (&str)[N]) noexcept { std::copy_n(str, length, value); }
 
-		constexpr basic_string_literal(const basic_string_literal&) = default;
-		constexpr basic_string_literal(basic_string_literal&&) = default;
+		constexpr basic_inplace_string(const basic_inplace_string&) = default;
+		constexpr basic_inplace_string(basic_inplace_string&&) = default;
 
-		constexpr basic_string_literal& operator=(const basic_string_literal&) = default;
-		constexpr basic_string_literal& operator=(basic_string_literal&&) = default;
+		constexpr basic_inplace_string& operator=(const basic_inplace_string&) = default;
+		constexpr basic_inplace_string& operator=(basic_inplace_string&&) = default;
 
-		constexpr basic_string_literal(const std::array<CharT, N> str) noexcept {
+		constexpr basic_inplace_string(const std::array<CharT, N> str) noexcept {
 			std::copy_n(str.data(), length, value);
 		}
 
 		constexpr reference at(size_type pos) {
 			// if(not std::is_constant_evaluated() and pos >= length)
-			// throw std::out_of_range(std::format("index {} is out of bounds of basic_string_literal
+			// throw std::out_of_range(std::format("index {} is out of bounds of basic_inplace_string
 			// with size {}.", pos, length));
 			return value[pos];
 		}
 
 		constexpr const_reference at(size_type pos) const {
 			// if(not std::is_constant_evaluated() and pos >= length)
-			// throw std::out_of_range(std::format("index {} is out of bounds of basic_string_literal
+			// throw std::out_of_range(std::format("index {} is out of bounds of basic_inplace_string
 			// with size {}.", pos, length));
 			return value[pos];
 		}
@@ -80,10 +80,10 @@ namespace roy::util {
 		constexpr size_type capacity() const noexcept { return length; }
 
 		template<size_type Pos = 0, size_type Count = length>
-		constexpr basic_string_literal<value_type, Count + 1, traits_type> substr() const noexcept {
+		constexpr basic_inplace_string<value_type, Count + 1, traits_type> substr() const noexcept {
 			std::array<char, Count + 1> substring{};
 			std::copy_n(&value[Pos], Count, substring.data());
-			return basic_string_literal<value_type, Count + 1, traits_type>{substring};
+			return basic_inplace_string<value_type, Count + 1, traits_type>{substring};
 		}
 
 		constexpr std::basic_string_view<value_type, traits_type>
@@ -123,75 +123,75 @@ namespace roy::util {
 	};
 
 	template<std::size_t N>
-	using string_literal = basic_string_literal<char, N>;
+	using inplace_string = basic_inplace_string<char, N>;
 	template<std::size_t N>
-	using wstring_literal = basic_string_literal<wchar_t, N>;
+	using winplace_string = basic_inplace_string<wchar_t, N>;
 	template<std::size_t N>
-	using u8string_literal = basic_string_literal<char8_t, N>;
+	using u8inplace_string = basic_inplace_string<char8_t, N>;
 	template<std::size_t N>
-	using u16string_literal = basic_string_literal<char16_t, N>;
+	using u16inplace_string = basic_inplace_string<char16_t, N>;
 	template<std::size_t N>
-	using u32string_literal = basic_string_literal<char32_t, N>;
+	using u32inplace_string = basic_inplace_string<char32_t, N>;
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
 	constexpr std::basic_ostream<CharT, Traits>&
-		operator<<(std::basic_ostream<CharT, Traits>& stream, const basic_string_literal<CharT, N, Traits>& str) {
+		operator<<(std::basic_ostream<CharT, Traits>& stream, const basic_inplace_string<CharT, N, Traits>& str) {
 		stream << str.value;
 		return stream;
 	}
 
 	template<std::size_t NA, std::size_t NB, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<CharT, NA + NB - 1, Traits>
-		operator+(const basic_string_literal<CharT, NA, Traits>& a, const basic_string_literal<CharT, NB, Traits>& b) noexcept {
+	constexpr basic_inplace_string<CharT, NA + NB - 1, Traits>
+		operator+(const basic_inplace_string<CharT, NA, Traits>& a, const basic_inplace_string<CharT, NB, Traits>& b) noexcept {
 		std::array<CharT, NA + NB - 1> new_value{};
 		std::copy_n(a.value, NA - 1, new_value.data());
 		std::copy_n(b.value, NB, new_value.data() + NA - 1);
 
-		return basic_string_literal<CharT, NA + NB - 1, Traits>{new_value};
+		return basic_inplace_string<CharT, NA + NB - 1, Traits>{new_value};
 	}
 
 	template<std::size_t NA, std::size_t NB, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<CharT, NA + NB - 1, Traits>
-		operator+(const CharT (&a)[NA], const basic_string_literal<CharT, NB, Traits>& b) noexcept {
+	constexpr basic_inplace_string<CharT, NA + NB - 1, Traits>
+		operator+(const CharT (&a)[NA], const basic_inplace_string<CharT, NB, Traits>& b) noexcept {
 		std::array<CharT, NA + NB - 1> new_value{};
 		std::copy_n(a, NA - 1, new_value.data());
 		std::copy_n(b.value, NB, new_value.data() + NA - 1);
 
-		return basic_string_literal<CharT, NA + NB - 1, Traits>{new_value};
+		return basic_inplace_string<CharT, NA + NB - 1, Traits>{new_value};
 	}
 
 	template<std::size_t NA, std::size_t NB, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<CharT, NA + NB - 1, Traits>
-		operator+(const basic_string_literal<CharT, NA, Traits>& a, const CharT (&b)[NB]) noexcept {
+	constexpr basic_inplace_string<CharT, NA + NB - 1, Traits>
+		operator+(const basic_inplace_string<CharT, NA, Traits>& a, const CharT (&b)[NB]) noexcept {
 		std::array<CharT, NA + NB - 1> new_value{};
 		std::copy_n(a.value, NA - 1, new_value.data());
 		std::copy_n(b, NB, new_value.data() + NA - 1);
 
-		return basic_string_literal<CharT, NA + NB - 1, Traits>{new_value};
+		return basic_inplace_string<CharT, NA + NB - 1, Traits>{new_value};
 	}
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<CharT, N + 1, Traits>
-		operator+(CharT ch, const basic_string_literal<CharT, N, Traits>& b) noexcept {
+	constexpr basic_inplace_string<CharT, N + 1, Traits>
+		operator+(CharT ch, const basic_inplace_string<CharT, N, Traits>& b) noexcept {
 		std::array<CharT, N + 1> new_value{};
 		new_value[0] = ch;
 		std::copy_n(b.value, N, new_value.data() + 1);
 
-		return basic_string_literal<CharT, N + 1, Traits>{new_value};
+		return basic_inplace_string<CharT, N + 1, Traits>{new_value};
 	}
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
-	constexpr basic_string_literal<CharT, N + 1, Traits>
-		operator+(const basic_string_literal<CharT, N, Traits>& a, CharT ch) noexcept {
+	constexpr basic_inplace_string<CharT, N + 1, Traits>
+		operator+(const basic_inplace_string<CharT, N, Traits>& a, CharT ch) noexcept {
 		std::array<CharT, N + 1> new_value{};
 		std::copy_n(a.value, N - 1, new_value.data());
 		new_value[N - 1] = ch;
 		new_value[N] = a.value[N - 1];
 
-		return basic_string_literal<CharT, N + 1, Traits>{new_value};
+		return basic_inplace_string<CharT, N + 1, Traits>{new_value};
 	}
 
 	template<std::size_t N, typename CharT>
-	basic_string_literal(const CharT (&str)[N]) -> basic_string_literal<CharT, N, std::char_traits<CharT>>;
+	basic_inplace_string(const CharT (&str)[N]) -> basic_inplace_string<CharT, N, std::char_traits<CharT>>;
 } // namespace roy::util
 #endif

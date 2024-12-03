@@ -43,7 +43,7 @@
 #include "./util/return_type_of_function_pointer_type.hpp"
 #include "./util/return_type_of_member_function_pointer.hpp"
 #include "./util/return_type_of_member_function_pointer_type.hpp"
-#include "./util/string_literal.hpp"
+#include "./util/inplace_string.hpp"
 #include "./util/type_count.hpp"
 #include "./util/type_of_field_pointer.hpp"
 #include "./util/type_of_field_pointer_type.hpp"

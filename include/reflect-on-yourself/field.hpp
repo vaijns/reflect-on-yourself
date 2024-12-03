@@ -6,7 +6,7 @@
 #include <type_traits>
 
 namespace roy {
-	template<auto FieldPtr, util::basic_string_literal Name, typename... TExtensions>
+	template<auto FieldPtr, util::basic_inplace_string Name, typename... TExtensions>
 		requires(util::member_field_pointer<FieldPtr>)
 	struct field {
 		using field_type = field<FieldPtr, Name, TExtensions...>;
@@ -22,7 +22,7 @@ namespace roy {
 		template<typename TExtension>
 		using extend = field<FieldPtr, Name, TExtensions..., TExtension>;
 
-		template<util::basic_string_literal AliasName>
+		template<util::basic_inplace_string AliasName>
 		using alias = field<FieldPtr, AliasName, TExtensions...>;
 
 		template<typename TExtensionTag>
@@ -32,7 +32,7 @@ namespace roy {
 	template<typename TField>
 	struct is_field_type : std::false_type { };
 
-	template<typename TType, typename UDeclaringType, TType UDeclaringType::* FieldPtr, util::basic_string_literal Name, typename... VExtensions>
+	template<typename TType, typename UDeclaringType, TType UDeclaringType::* FieldPtr, util::basic_inplace_string Name, typename... VExtensions>
 	struct is_field_type<field<FieldPtr, Name, VExtensions...>> : std::true_type { };
 
 	template<typename TField>
@@ -46,7 +46,7 @@ namespace roy {
 	template<typename TField, typename UDeclaringType>
 	struct is_field_type_of : std::false_type { };
 
-	template<typename TType, typename UDeclaringType, TType UDeclaringType::* FieldPtr, util::basic_string_literal Name, typename... VExtensions>
+	template<typename TType, typename UDeclaringType, TType UDeclaringType::* FieldPtr, util::basic_inplace_string Name, typename... VExtensions>
 	struct is_field_type_of<field<FieldPtr, Name, VExtensions...>, UDeclaringType> : std::true_type { };
 
 	template<typename TField, typename UDeclaringType>
