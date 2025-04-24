@@ -1,3 +1,4 @@
+#include "reflect-on-yourself/reflection.hpp"
 #include <reflect-on-yourself.hpp>
 #include <print>
 #include <cstdint>
@@ -49,7 +50,7 @@ std::string to_string(const std::optional<std::string>& value){
 
 int main(int argc, char* argv[]){
 	std::println("{}", roy::reflection_of<user>::name());
-	std::println("{}", roy::reflection_of<bool>::name());
+	std::println("{} (builtin: {})", roy::reflection_of<bool>::name(), roy::reflection_of<bool>::is_builtin_type());
 
 	user user_a{
 		.id = 1,

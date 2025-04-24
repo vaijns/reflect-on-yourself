@@ -5,6 +5,9 @@
 #include "../util/type_wrapper.hpp"
 
 namespace roy::detail{
+	template<typename Builder, typename NewExtensionTag, typename NewExtension>
+	struct extended_builder;
+
 	template<
 		typename Type,
 		typename AvailableBuilderTags = roy::util::type_wrapper<>,
@@ -37,6 +40,17 @@ namespace roy::detail{
 		struct result{
 			using type = result_t;
 		};
+		template<typename NewExtensionTag, typename NewExtension>
+		using extend = roy::detail::extended_builder<
+			roy::detail::type_builder<
+				Type,
+				roy::util::type_wrapper<AvailableBuilderTags...>,
+				roy::util::type_wrapper<ExtensionTags...>,
+				roy::util::type_wrapper<Extensions...>
+			>,
+			NewExtensionTag,
+			NewExtension
+		>::type;
 	};
 }
 
