@@ -6,6 +6,9 @@
 #include <string>
 #include <utility>
 #include <array>
+#include <vector>
+#include <ranges>
+#include <sstream>
 
 struct user{
 	std::uint64_t id;
@@ -29,23 +32,127 @@ template<> struct roy::provide_reflection<user>
 		>
 		::result{};
 
-std::string to_string(std::uint64_t value){
-	return std::to_string(value);
+template<typename T>
+concept has_reflection = requires(T t){
+	typename roy::reflection_of<T>;
+};
+
+template<typename T>
+concept reflection_of_builtin = has_reflection<T> && roy::reflection_of<T>::is_builtin_type();
+
+template<typename T> requires(has_reflection<T> && not reflection_of_builtin<T>)
+constexpr std::string json_serialize(const T& t);
+
+constexpr std::string json_serialize(const std::string& val){
+	std::stringstream s{};
+	s << '"' << val << '"';
+	return s.str();
 }
 
-std::string to_string(std::string&& value){
-	return value;
+constexpr std::string json_serialize(std::string_view val){
+	std::stringstream s{};
+	s << '"' << std::string{val} << '"';
+	return s.str();
 }
 
-std::string to_string(const std::string& value){
-	return value;
+constexpr std::string json_serialize(std::uint8_t val){
+	return std::to_string(val);
 }
 
-std::string to_string(const std::optional<std::string>& value){
-	if(not value.has_value())
-		return std::string{"-"};
+constexpr std::string json_serialize(std::uint16_t val){
+	return std::to_string(val);
+}
 
-	return value.value();
+constexpr std::string json_serialize(std::uint32_t val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(std::uint64_t val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(std::int8_t val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(std::int16_t val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(std::int32_t val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(std::int64_t val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(bool val){
+	if(val)
+		return std::string{"true"};
+
+	return std::string{"false"};
+}
+
+constexpr std::string json_serialize(float val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(double val){
+	return std::to_string(val);
+}
+
+constexpr std::string json_serialize(long double val){
+	return std::to_string(val);
+}
+
+template<typename T>
+constexpr std::string json_serialize(const std::optional<T>& t){
+	if(not t.has_value())
+		return std::string{"null"};
+
+	return json_serialize(t.value());
+}
+
+template<std::ranges::forward_range R>
+constexpr std::string json_serialize(R&& r){
+	std::stringstream s{};
+	s << '[';
+	bool is_first{true};
+	for(const auto& t : r){
+		if(not is_first)
+			s << ',';
+
+		s << json_serialize(t);
+
+		is_first = false;
+	}
+	s << ']';
+
+	return s.str();
+}
+
+template<typename T, std::size_t N>
+constexpr std::string json_serialize_nth_field(const T& t){
+	std::stringstream s{};
+	if constexpr (N > 0)
+		s << ',';
+
+	s << '"' << std::string{roy::nth_field_name_of<N, T>()} << "\":" << json_serialize(roy::nth_field_value<N>(t));
+	return s.str();
+}
+
+template<typename T> requires(has_reflection<T> && not reflection_of_builtin<T>)
+constexpr std::string json_serialize(const T& t){
+	std::stringstream s{};
+	s << '{';
+
+	[&s, &t]<std::size_t... Is>(std::index_sequence<Is...>){
+		s << (json_serialize_nth_field<T, Is>(t) + ...);
+	}(std::make_index_sequence<roy::field_count_of<T>()>{});
+
+	s << '}';
+	return s.str();
 }
 
 int main(int argc, char* argv[]){
@@ -73,18 +180,18 @@ int main(int argc, char* argv[]){
 	user_a.email = "email_a_changed";
 	std::println("a: {}", email_a);
 
-	auto key_value_pairs{[user_a]<std::size_t... Is>(std::index_sequence<Is...>){
-		return std::array<std::pair<std::string, std::string>, sizeof...(Is)>{
-			std::pair<std::string, std::string>{
-				std::string{roy::nth_field_name_of<Is, user>()},
-				to_string(roy::nth_field_value<Is>(user_a))
-			}...
-		};
-	}(std::make_index_sequence<roy::field_count_of<user>()>{})};
-
-	for(const auto& [field_name, field_value] : key_value_pairs){
-		std::println("{}: {}", field_name, field_value);
-	}
+	std::println("\"users\":{}",  json_serialize(std::vector{
+		user{
+			.id = 0,
+			.email = "abc",
+			.name = "def"
+		},
+		user{
+			.id = 3,
+			.email = "hello@world.com",
+			.name = std::nullopt
+		}
+	}));
 
 	return 0;
 }
