@@ -147,16 +147,37 @@ namespace roy{
 		return obj.*roy::nth_field_ptr_of<N, ReflectableType>();
 	}
 
+	template<std::size_t N, typename ReflectableType>
+	inline constexpr auto annotations_of_nth_field() noexcept{
+		return roy::nth_field_reflection_of<N, ReflectableType>::annotation_values;
+	}
+
 	template<typename AnnotationType, std::size_t N, typename ReflectableType>
 	inline constexpr auto nth_field_annotation_of() noexcept
 		-> AnnotationType{
-		return std::get<AnnotationType>(roy::nth_field_reflection_of<N, ReflectableType>::annotation_values);
+		return std::get<AnnotationType>(roy::annotations_of_nth_field<N, ReflectableType>());
+	}
+
+	template<typename ReflectableType>
+	inline constexpr auto annotations_of() noexcept{
+		return roy::reflection_of<ReflectableType>::annotation_values;
 	}
 
 	template<typename AnnotationType, typename ReflectableType>
 	inline constexpr auto annotation_of() noexcept
 		-> AnnotationType{
-		return std::get<AnnotationType>(roy::reflection_of<ReflectableType>::annotation_values);
+		return std::get<AnnotationType>(roy::annotations_of<ReflectableType>());
+	}
+
+	template<auto FieldPtr>
+	inline constexpr auto annotations_of() noexcept{
+		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
+		using field_reflection = roy::nth_field_reflection_of<
+			field_index,
+			roy::util::field_ptr_declaring_type_t<FieldPtr>
+		>;
+
+		return field_reflection::annotation_values;
 	}
 
 	template<typename AnnotationType, auto FieldPtr>
@@ -168,7 +189,7 @@ namespace roy{
 			roy::util::field_ptr_declaring_type_t<FieldPtr>
 		>;
 
-		return std::get<AnnotationType>(field_reflection::annotation_values);
+		return std::get<AnnotationType>(roy::annotations_of<FieldPtr>());
 	}
 
 	template<typename AnnotationType, std::size_t N, typename ReflectableType>
@@ -185,21 +206,16 @@ namespace roy{
 		-> bool{
 		return roy::detail::contains_type<
 			AnnotationType,
-			decltype(roy::reflection_of<ReflectableType>::annotation_values)
+			decltype(roy::annotations_of<ReflectableType>())
 		>();
 	}
 
 	template<typename AnnotationType, auto FieldPtr>
 	inline constexpr auto has_annotation() noexcept
 		-> bool{
-		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
-		using field_reflection = roy::nth_field_reflection_of<
-			field_index,
-			roy::util::field_ptr_declaring_type_t<FieldPtr>
-		>;
 		return roy::detail::contains_type<
 			AnnotationType,
-			decltype(field_reflection::annotation_values)
+			decltype(roy::annotations_of<FieldPtr>())
 		>();
 	}
 }

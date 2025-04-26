@@ -19,6 +19,10 @@ struct table_name{
 };
 static constexpr const char user_table_name[]{"user_table"};
 
+struct other_annotation{
+	int value;
+};
+
 struct column_name{
 	const char* name;
 };
@@ -44,6 +48,7 @@ template<> struct roy::provide_reflection<user>
 				::result
 		>
 		::with_annotation<table_name{user_table_name}>
+		::with_annotation<other_annotation{3}>
 		::result{};
 
 template<typename T>
@@ -218,6 +223,7 @@ int main(int argc, char* argv[]){
 	}));
 
 	std::println("table_name: {}", roy::annotation_of<table_name, user>().name);
+	std::println("other_annotation: {}", roy::annotation_of<other_annotation, user>().value);
 	std::println("column_name by index: {}", roy::nth_field_annotation_of<column_name, 1, user>().name);
 	std::println("column_name by ptr: {}", roy::annotation_of<column_name, &user::id>().name);
 

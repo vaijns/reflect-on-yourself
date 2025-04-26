@@ -3,8 +3,6 @@
 
 #include "../builder/builder.hpp"
 #include "../builder/extended_builder.hpp"
-#include "../util/inplace_string.hpp"
-#include "../util/get_name.hpp"
 
 #include <tuple>
 #include <type_traits>
@@ -86,6 +84,14 @@ namespace roy::detail{
 		static constexpr std::tuple<> value{};
 	};
 
+	template<typename Extension>
+	inline constexpr auto get_annotation_values() noexcept{
+		if constexpr (roy::detail::is_annotation<Extension>)
+			return Extension::annotation_values;
+		else
+			return std::tuple<>{};
+	}
+
 	template<typename Type, typename... AvailableBuilderTags, typename... ExtensionTags, typename... Extensions>
 	struct get_annotations<
 		roy::detail::type_builder<
@@ -96,7 +102,7 @@ namespace roy::detail{
 		>
 	>{
 		static constexpr auto value{
-			std::tuple_cat(std::conditional_t<roy::detail::is_annotation<Extensions>, std::tuple<Extensions>, std::tuple<>>{}...)
+			std::tuple_cat(get_annotation_values<Extensions>()...)
 		};
 	};
 
@@ -110,7 +116,7 @@ namespace roy::detail{
 		>
 	>{
 		static constexpr auto value{
-			std::tuple_cat(std::conditional_t<roy::detail::is_annotation<Extensions>, std::tuple<Extensions>, std::tuple<>>{}...)
+			std::tuple_cat(get_annotation_values<Extensions>()...)
 		};
 	};
 
