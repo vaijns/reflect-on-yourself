@@ -221,5 +221,9 @@ int main(int argc, char* argv[]){
 	std::println("column_name by index: {}", roy::nth_field_annotation_of<column_name, 1, user>().name);
 	std::println("column_name by ptr: {}", roy::annotation_of<column_name, &user::id>().name);
 
+	std::println("user has column_name annotation: {}", roy::has_annotation<column_name, user>());
+	std::println("email has table_name annotation: {}", roy::has_annotation<table_name, &user::email>());
+	std::println("id column by index has column_name annotation: {}", roy::nth_field_has_annotation<column_name, 0, user>());
+
 	return 0;
 }

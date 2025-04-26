@@ -49,6 +49,19 @@ namespace roy::detail{
 		else
 			return field_ptr_a == field_ptr_b;
 	}
+
+	template<typename SearchedType, typename TypeList>
+	struct contains_type_impl;
+
+	template<typename SearchedType, template<typename...> typename Wrapper, typename... Types>
+	struct contains_type_impl<SearchedType, Wrapper<Types...>>
+		: std::bool_constant<(std::is_same_v<SearchedType, Types> || ...)>{};
+
+	template<typename SearchedType, typename TypeList>
+	inline constexpr auto contains_type() noexcept
+		-> bool{
+		return contains_type_impl<SearchedType, std::remove_cvref_t<TypeList>>::value;
+	}
 }
 
 namespace roy{
@@ -156,6 +169,38 @@ namespace roy{
 		>;
 
 		return std::get<AnnotationType>(field_reflection::annotation_values);
+	}
+
+	template<typename AnnotationType, std::size_t N, typename ReflectableType>
+	inline constexpr auto nth_field_has_annotation() noexcept
+		-> bool{
+		return roy::detail::contains_type<
+			AnnotationType,
+			decltype(roy::nth_field_reflection_of<N, ReflectableType>::annotation_values)
+		>();
+	}
+
+	template<typename AnnotationType, typename ReflectableType>
+	inline constexpr auto has_annotation() noexcept
+		-> bool{
+		return roy::detail::contains_type<
+			AnnotationType,
+			decltype(roy::reflection_of<ReflectableType>::annotation_values)
+		>();
+	}
+
+	template<typename AnnotationType, auto FieldPtr>
+	inline constexpr auto has_annotation() noexcept
+		-> bool{
+		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
+		using field_reflection = roy::nth_field_reflection_of<
+			field_index,
+			roy::util::field_ptr_declaring_type_t<FieldPtr>
+		>;
+		return roy::detail::contains_type<
+			AnnotationType,
+			decltype(field_reflection::annotation_values)
+		>();
 	}
 }
 

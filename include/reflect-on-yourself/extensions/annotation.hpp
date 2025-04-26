@@ -208,12 +208,6 @@ namespace roy::detail{
 				std::make_tuple(Annotation)
 			)
 		};
-
-		template<typename AnnotationType>
-		static constexpr auto annotation() noexcept
-			-> AnnotationType{
-			return std::get<AnnotationType>(annotation_values);
-		}
 	};
 }
 
