@@ -1,11 +1,9 @@
-#include "reflect-on-yourself/reflection.hpp"
 #include <reflect-on-yourself.hpp>
 #include <print>
 #include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>
-#include <array>
 #include <vector>
 #include <ranges>
 #include <sstream>
@@ -16,20 +14,36 @@ struct user{
 	std::optional<std::string> name;
 };
 
+struct table_name{
+	const char* name;
+};
+static constexpr const char user_table_name[]{"user_table"};
+
+struct column_name{
+	const char* name;
+};
+static constexpr const char id_column_name[]{"id"};
+static constexpr const char email_column_name[]{"mail"};
+static constexpr const char name_column_name[]{"name"};
+
 template<> struct roy::provide_reflection<user>
 	: roy::reflection::for_type<user>
-		::with_name<"user">
+		::with_auto_name
 		::with_fields<
 			roy::reflection::for_field<&user::id>
-				::with_name<"id">
+				::with_auto_name
+				::with_annotation<column_name{id_column_name}>
 				::result,
 			roy::reflection::for_field<&user::email>
-				::with_name<"email">
+				::with_auto_name
+				::with_annotation<column_name{email_column_name}>
 				::result,
 			roy::reflection::for_field<&user::name>
-				::with_name<"name">
+				::with_auto_name
+				::with_annotation<column_name{name_column_name}>
 				::result
 		>
+		::with_annotation<table_name{user_table_name}>
 		::result{};
 
 template<typename T>
@@ -187,11 +201,25 @@ int main(int argc, char* argv[]){
 			.name = "def"
 		},
 		user{
+			.id = 1,
+			.email = "ghi",
+			.name = std::nullopt
+		},
+		user{
+			.id = 2,
+			.email = "jkl",
+			.name = "mno"
+		},
+		user{
 			.id = 3,
 			.email = "hello@world.com",
 			.name = std::nullopt
 		}
 	}));
+
+	std::println("table_name: {}", roy::annotation_of<table_name, user>().name);
+	std::println("column_name by index: {}", roy::nth_field_annotation_of<column_name, 1, user>().name);
+	std::println("column_name by ptr: {}", roy::annotation_of<column_name, &user::id>().name);
 
 	return 0;
 }

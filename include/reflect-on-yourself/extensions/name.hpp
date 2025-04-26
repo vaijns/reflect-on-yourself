@@ -4,6 +4,7 @@
 #include "../builder/builder.hpp"
 #include "../builder/extended_builder.hpp"
 #include "../util/inplace_string.hpp"
+#include "../util/get_name.hpp"
 
 namespace roy::extensions{
 	struct name_extension_tag{};
@@ -21,6 +22,12 @@ struct roy::detail::builder<roy::extensions::name_extension_tag, For>{
 		For,
 		roy::extensions::name_extension_tag,
 		extension<Name>
+	>::type;
+
+	using with_auto_name = roy::detail::extended_builder<
+		For,
+		roy::extensions::name_extension_tag,
+		extension<roy::util::get_name<For>()>
 	>::type;
 };
 #endif
