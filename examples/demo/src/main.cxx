@@ -7,6 +7,7 @@
 #include <vector>
 #include <ranges>
 #include <sstream>
+#include <format>
 
 struct user{
 	std::uint64_t id;
@@ -60,73 +61,33 @@ template<typename T>
 concept reflection_of_builtin = has_reflection<T> && roy::reflection_of<T>::is_builtin_type();
 
 template<typename T> requires(has_reflection<T> && not reflection_of_builtin<T>)
-constexpr std::string json_serialize(const T& t);
+std::string json_serialize(const T& t);
 
-constexpr std::string json_serialize(const std::string& val){
-	std::stringstream s{};
-	s << '"' << val << '"';
-	return s.str();
+std::string json_serialize(const std::string& val){
+	return std::format("\"{}\"", val);
 }
 
-constexpr std::string json_serialize(std::string_view val){
-	std::stringstream s{};
-	s << '"' << std::string{val} << '"';
-	return s.str();
+std::string json_serialize(std::string_view val){
+	return std::format("\"{}\"", val);
 }
 
-constexpr std::string json_serialize(std::uint8_t val){
+std::string json_serialize(std::integral auto val){
 	return std::to_string(val);
 }
 
-constexpr std::string json_serialize(std::uint16_t val){
+std::string json_serialize(std::floating_point auto val){
 	return std::to_string(val);
 }
 
-constexpr std::string json_serialize(std::uint32_t val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(std::uint64_t val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(std::int8_t val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(std::int16_t val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(std::int32_t val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(std::int64_t val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(bool val){
+std::string json_serialize(bool val){
 	if(val)
 		return std::string{"true"};
 
 	return std::string{"false"};
 }
 
-constexpr std::string json_serialize(float val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(double val){
-	return std::to_string(val);
-}
-
-constexpr std::string json_serialize(long double val){
-	return std::to_string(val);
-}
-
 template<typename T>
-constexpr std::string json_serialize(const std::optional<T>& t){
+std::string json_serialize(const std::optional<T>& t){
 	if(not t.has_value())
 		return std::string{"null"};
 
@@ -134,7 +95,7 @@ constexpr std::string json_serialize(const std::optional<T>& t){
 }
 
 template<std::ranges::forward_range R>
-constexpr std::string json_serialize(R&& r){
+std::string json_serialize(R&& r){
 	std::stringstream s{};
 	s << '[';
 	bool is_first{true};
@@ -152,7 +113,7 @@ constexpr std::string json_serialize(R&& r){
 }
 
 template<typename T, std::size_t N>
-constexpr std::string json_serialize_nth_field(const T& t){
+std::string json_serialize_nth_field(const T& t){
 	std::stringstream s{};
 	if constexpr (N > 0)
 		s << ',';
@@ -162,7 +123,7 @@ constexpr std::string json_serialize_nth_field(const T& t){
 }
 
 template<typename T> requires(has_reflection<T> && not reflection_of_builtin<T>)
-constexpr std::string json_serialize(const T& t){
+std::string json_serialize(const T& t){
 	std::stringstream s{};
 	s << '{';
 
@@ -227,9 +188,14 @@ int main(int argc, char* argv[]){
 	std::println("column_name by index: {}", roy::nth_field_annotation_of<column_name, 1, user>().name);
 	std::println("column_name by ptr: {}", roy::annotation_of<column_name, &user::id>().name);
 
-	std::println("user has column_name annotation: {}", roy::has_annotation<column_name, user>());
-	std::println("email has table_name annotation: {}", roy::has_annotation<table_name, &user::email>());
-	std::println("id column by index has column_name annotation: {}", roy::nth_field_has_annotation<column_name, 0, user>());
+	static_assert(roy::has_annotation<table_name, user>());
+	static_assert(not roy::has_annotation<column_name, user>());
+
+	static_assert(not roy::has_annotation<table_name, &user::email>());
+	static_assert(roy::has_annotation<column_name, &user::email>());
+
+	static_assert(not roy::nth_field_has_annotation<table_name, 0, user>());
+	static_assert(roy::nth_field_has_annotation<column_name, 0, user>());
 
 	return 0;
 }
