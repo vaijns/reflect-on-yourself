@@ -12,6 +12,7 @@ namespace roy::identifier{
 
 template<> struct roy::provide_reflection<float>
 	: roy::reflection::for_type<float>
+		::with_default_builders
 		::with_auto_name
 		//::with_name<"float32">
 		::with_identifier<roy::identifier::float32>
@@ -20,6 +21,7 @@ template<> struct roy::provide_reflection<float>
 
 template<> struct roy::provide_reflection<double>
 	: roy::reflection::for_type<double>
+		::with_default_builders
 		::with_auto_name
 		//::with_name<"float64">
 		::with_identifier<roy::identifier::float64>
@@ -28,6 +30,7 @@ template<> struct roy::provide_reflection<double>
 
 template<> struct roy::provide_reflection<long double>
 	: roy::reflection::for_type<long double>
+		::with_default_builders
 		::with_auto_name
 		//::with_name<"float128">
 		::with_identifier<roy::identifier::float128>

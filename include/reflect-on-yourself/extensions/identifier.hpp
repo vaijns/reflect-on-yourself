@@ -9,10 +9,10 @@
 		template<typename T> struct type{ using NAME = T; };\
 		template<typename T> struct static_constexpr_field{ static constexpr T NAME{}; };\
 		template<typename T> struct static_field{ static T NAME{}; };\
-		template<auto Value> struct static_constexpr_field_value{ static constexpr auto NAME{Value}; };\
-		template<auto Value> struct static_field_value{ static auto NAME{Value}; };\
+		template<auto Value> struct static_constexpr_field_value{ static constexpr decltype(Value) NAME{Value}; };\
+		template<auto Value> struct static_field_value{ static decltype(Value) NAME{Value}; };\
 		template<typename T> struct field{ T NAME{}; };\
-		template<auto Value> struct field_value{ auto NAME{Value}; };\
+		template<auto Value> struct field_value{ decltype(Value) NAME{Value}; };\
 	};
 
 namespace roy::extensions{

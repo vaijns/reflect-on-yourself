@@ -10,6 +10,7 @@ namespace roy::identifier{
 
 template<> struct roy::provide_reflection<bool>
 	: roy::reflection::for_type<bool>
+		::with_default_builders
 		::with_auto_name
 		//::with_name<"boolean">
 		::with_identifier<roy::identifier::boolean>
