@@ -197,5 +197,8 @@ int main(int argc, char* argv[]){
 	static_assert(not roy::nth_field_has_annotation<table_name, 0, user>());
 	static_assert(roy::nth_field_has_annotation<column_name, 0, user>());
 
+	roy::reflection_of<std::uint64_t>::identifier::field<std::string> my_field{};
+	my_field.uint64 = "identifier_field";
+
 	return 0;
 }

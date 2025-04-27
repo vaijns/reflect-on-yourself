@@ -5,14 +5,14 @@
 #include "../builder/extended_builder.hpp"
 
 #define ROY_MAKE_REFLECTION_IDENTIFIER(NAME) \
-	template<typename T> struct NAME{\
-		struct type{ using NAME = T; };\
-		struct static_constexpr_field{ static constexpr T NAME{}; };\
-		struct static_field{ static T NAME{}; };\
-		template<T Value> struct static_constexpr_field_value{ static constexpr T NAME{Value}; };\
-		template<T Value> struct static_field_value{ static T NAME{Value}; };\
-		struct field{ T NAME{}; };\
-		template<T Value> struct field_value{ T NAME{Value}; };\
+	struct NAME{\
+		template<typename T> struct type{ using NAME = T; };\
+		template<typename T> struct static_constexpr_field{ static constexpr T NAME{}; };\
+		template<typename T> struct static_field{ static T NAME{}; };\
+		template<auto Value> struct static_constexpr_field_value{ static constexpr auto NAME{Value}; };\
+		template<auto Value> struct static_field_value{ static auto NAME{Value}; };\
+		template<typename T> struct field{ T NAME{}; };\
+		template<auto Value> struct field_value{ auto NAME{Value}; };\
 	};
 
 namespace roy::extensions{
@@ -21,13 +21,12 @@ namespace roy::extensions{
 
 template<typename For>
 struct roy::detail::builder<roy::extensions::identifier_extension_tag, For>{
-	template<template<typename> typename Identifier>
+	template<typename Identifier>
 	struct extension{
-		template<typename T>
-		using identifier = Identifier<T>;
+		using identifier = Identifier;
 	};
 
-	template<template<typename> typename Identifier>
+	template<typename Identifier>
 	using with_identifier = roy::detail::extended_builder<
 		For,
 		roy::extensions::identifier_extension_tag,
