@@ -223,7 +223,8 @@ struct roy::detail::builder<roy::extensions::annotation_extension_tag, For>{
 	using with_annotation = roy::detail::extended_builder<
 		roy::detail::remove_annotations_t<For>,
 		roy::extensions::annotation_extension_tag,
-		roy::detail::add_annotation<For, Annotation>
+		roy::detail::add_annotation<For, Annotation>,
+		false
 	>::type;
 };
 #endif

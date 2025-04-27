@@ -18,6 +18,11 @@ struct user{
 template<std::size_t N> struct table_name{ const char name[N]; };
 struct other_annotation{ int value; };
 template<std::size_t N> struct column_name{ const char name[N]; };
+template<std::size_t NA, std::size_t NB, std::size_t NC> struct multiple_strings{
+	const char string_a[NA];
+	const char string_b[NB];
+	const char string_c[NC];
+};
 
 template<> struct roy::provide_reflection<user>
 	: roy::reflection::for_type<user>
@@ -34,6 +39,7 @@ template<> struct roy::provide_reflection<user>
 			roy::reflection::for_field<&user::name>
 				::with_auto_name
 				::with_annotation<column_name{"name"}>
+				::with_annotation<multiple_strings{"string_a", "another string", "string #c"}>
 				::result
 		>
 		::with_annotation<table_name{"user_table"}>
@@ -175,6 +181,12 @@ int main(int argc, char* argv[]){
 	std::println("other_annotation: {}", roy::annotation_of<other_annotation, user>().value);
 	std::println("column_name by index: {}", roy::nth_field_annotation_of<column_name, 1, user>().name);
 	std::println("column_name by ptr: {}", roy::annotation_of<column_name, &user::id>().name);
+	std::println(
+		"multiple strings annotation: {}, {}, {}",
+		roy::annotation_of<multiple_strings, &user::name>().string_a,
+		roy::annotation_of<multiple_strings, &user::name>().string_b,
+		roy::annotation_of<multiple_strings, &user::name>().string_c
+	);
 
 	static_assert(roy::has_annotation<table_name, user>());
 	static_assert(not roy::has_annotation<column_name, user>());

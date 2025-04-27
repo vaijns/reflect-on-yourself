@@ -7,6 +7,9 @@
 #include "../util/field_ptr_declaring_type.hpp"
 
 namespace roy::detail{
+	template<typename Builder, typename NewExtensionTag, typename NewExtension, bool RemoveBuilder>
+	struct extended_builder;
+
 	template<
 		auto FieldPtr,
 		typename AvailableBuilderTags = roy::util::type_wrapper<>,
@@ -44,6 +47,18 @@ namespace roy::detail{
 		struct result{
 			using type = result_t;
 		};
+		template<typename NewExtensionTag, typename NewExtension, bool RemoveBuilder>
+		using extend = roy::detail::extended_builder<
+			roy::detail::field_builder<
+				FieldPtr,
+				roy::util::type_wrapper<AvailableBuilderTags...>,
+				roy::util::type_wrapper<ExtensionTags...>,
+				roy::util::type_wrapper<Extensions...>
+			>,
+			NewExtensionTag,
+			NewExtension,
+			RemoveBuilder
+		>::type;
 	};
 }
 

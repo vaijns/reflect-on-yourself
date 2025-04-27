@@ -15,7 +15,7 @@ template<> struct roy::provide_reflection<float>
 		::with_auto_name
 		//::with_name<"float32">
 		::with_identifier<roy::identifier::float32>
-		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension>
+		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
 
 template<> struct roy::provide_reflection<double>
@@ -23,7 +23,7 @@ template<> struct roy::provide_reflection<double>
 		::with_auto_name
 		//::with_name<"float64">
 		::with_identifier<roy::identifier::float64>
-		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension>
+		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
 
 template<> struct roy::provide_reflection<long double>
@@ -31,7 +31,7 @@ template<> struct roy::provide_reflection<long double>
 		::with_auto_name
 		//::with_name<"float128">
 		::with_identifier<roy::identifier::float128>
-		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension>
+		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
 
 #endif

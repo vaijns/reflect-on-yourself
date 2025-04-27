@@ -31,7 +31,8 @@ struct roy::detail::builder<roy::extensions::identifier_extension_tag, For>{
 	using with_identifier = roy::detail::extended_builder<
 		For,
 		roy::extensions::identifier_extension_tag,
-		extension<Identifier>
+		extension<Identifier>,
+		true
 	>::type;
 };
 #endif

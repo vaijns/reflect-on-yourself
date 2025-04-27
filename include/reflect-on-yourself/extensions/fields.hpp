@@ -25,7 +25,8 @@ struct roy::detail::builder<roy::extensions::fields_extension_tag, For>{
 	using with_fields = roy::detail::extended_builder<
 		For,
 		roy::extensions::fields_extension_tag,
-		extension<Fields...>
+		extension<Fields...>,
+		true
 	>::type;
 };
 

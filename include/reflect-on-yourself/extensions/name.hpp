@@ -21,13 +21,15 @@ struct roy::detail::builder<roy::extensions::name_extension_tag, For>{
 	using with_name = roy::detail::extended_builder<
 		For,
 		roy::extensions::name_extension_tag,
-		extension<Name>
+		extension<Name>,
+		true
 	>::type;
 
 	using with_auto_name = roy::detail::extended_builder<
 		For,
 		roy::extensions::name_extension_tag,
-		extension<roy::util::get_name<For>()>
+		extension<roy::util::get_name<For>()>,
+		true
 	>::type;
 };
 #endif

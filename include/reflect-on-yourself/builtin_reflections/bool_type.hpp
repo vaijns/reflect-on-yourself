@@ -13,7 +13,7 @@ template<> struct roy::provide_reflection<bool>
 		::with_auto_name
 		//::with_name<"boolean">
 		::with_identifier<roy::identifier::boolean>
-		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension>
+		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
 
 #endif

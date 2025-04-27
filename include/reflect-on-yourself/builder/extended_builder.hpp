@@ -6,7 +6,7 @@
 #include "./field_builder.hpp"
 
 namespace roy::detail{
-	template<typename Builder, typename NewExtensionTag, typename NewExtension>
+	template<typename Builder, typename NewExtensionTag, typename NewExtension, bool RemoveBuilder>
 	struct extended_builder;
 
 	template<
@@ -15,7 +15,8 @@ namespace roy::detail{
 		typename... ExtensionTags,
 		typename... Extensions,
 		typename NewExtensionTag,
-		typename NewExtension
+		typename NewExtension,
+		bool RemoveBuilder
 	> struct extended_builder<
 		roy::detail::type_builder<
 			Type,
@@ -24,11 +25,16 @@ namespace roy::detail{
 			roy::util::type_wrapper<Extensions...>
 		>,
 		NewExtensionTag,
-		NewExtension
+		NewExtension,
+		RemoveBuilder
 	>{
 		using type = roy::detail::type_builder<
 			Type,
-			roy::util::type_wrapper<AvailableExtensionTags...>, // TODO: Remove NewExtensionTag
+			std::conditional_t<
+				RemoveBuilder,
+				roy::util::remove_type<NewExtensionTag, roy::util::type_wrapper<AvailableExtensionTags...>>,
+				roy::util::type_wrapper<AvailableExtensionTags...>
+			>,
 			roy::util::type_wrapper<ExtensionTags..., NewExtensionTag>,
 			roy::util::type_wrapper<Extensions..., NewExtension>
 		>;
@@ -40,7 +46,8 @@ namespace roy::detail{
 		typename... ExtensionTags,
 		typename... Extensions,
 		typename NewExtensionTag,
-		typename NewExtension
+		typename NewExtension,
+		bool RemoveBuilder
 	> struct extended_builder<
 		roy::detail::field_builder<
 			FieldPtr,
@@ -49,11 +56,16 @@ namespace roy::detail{
 			roy::util::type_wrapper<Extensions...>
 		>,
 		NewExtensionTag,
-		NewExtension
+		NewExtension,
+		RemoveBuilder
 	>{
 		using type = roy::detail::field_builder<
 			FieldPtr,
-			roy::util::type_wrapper<AvailableExtensionTags...>, // TODO: Remove NewExtensionTag
+			std::conditional_t<
+				RemoveBuilder,
+				roy::util::remove_type<NewExtensionTag, roy::util::type_wrapper<AvailableExtensionTags...>>,
+				roy::util::type_wrapper<AvailableExtensionTags...>
+			>,
 			roy::util::type_wrapper<ExtensionTags..., NewExtensionTag>,
 			roy::util::type_wrapper<Extensions..., NewExtension>
 		>;
