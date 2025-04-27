@@ -3,10 +3,7 @@
 
 #include "./builder/type_builder.hpp"
 #include "./builder/field_builder.hpp"
-#include "./extensions/name.hpp"
-#include "./extensions/identifier.hpp"
-#include "./extensions/fields.hpp"
-#include "./extensions/annotation.hpp"
+#include "./extensions/default_builders.hpp"
 #include "reflect-on-yourself/util/field_ptr_declaring_type.hpp"
 
 namespace roy{
@@ -18,10 +15,8 @@ namespace roy{
 		using for_type = roy::detail::type_builder<
 			Type,
 			roy::util::type_wrapper<
-				roy::extensions::name_extension_tag,
-				roy::extensions::identifier_extension_tag,
-				roy::extensions::fields_extension_tag,
-				roy::extensions::annotation_extension_tag
+				roy::extensions::builders_extension_tag,
+				roy::extensions::default_builders_extension_tag
 			>,
 			roy::util::type_wrapper<>,
 			roy::util::type_wrapper<>
@@ -31,9 +26,8 @@ namespace roy{
 		using for_field = roy::detail::field_builder<
 			FieldPtr,
 			roy::util::type_wrapper<
-				roy::extensions::name_extension_tag,
-				roy::extensions::identifier_extension_tag,
-				roy::extensions::annotation_extension_tag
+				roy::extensions::builders_extension_tag,
+				roy::extensions::default_builders_extension_tag
 			>,
 			roy::util::type_wrapper<>,
 			roy::util::type_wrapper<>

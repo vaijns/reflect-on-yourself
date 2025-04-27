@@ -26,17 +26,21 @@ template<std::size_t NA, std::size_t NB, std::size_t NC> struct multiple_strings
 
 template<> struct roy::provide_reflection<user>
 	: roy::reflection::for_type<user>
+		::with_default_builders
 		::with_auto_name
 		::with_fields<
 			roy::reflection::for_field<&user::id>
+				::with_default_builders
 				::with_auto_name
 				::with_annotation<column_name{"id"}>
 				::result,
 			roy::reflection::for_field<&user::email>
+				::with_default_builders
 				::with_auto_name
 				::with_annotation<column_name{"e-mail"}>
 				::result,
 			roy::reflection::for_field<&user::name>
+				::with_default_builders
 				::with_auto_name
 				::with_annotation<column_name{"name"}>
 				::with_annotation<multiple_strings{"string_a", "another string", "string #c"}>
