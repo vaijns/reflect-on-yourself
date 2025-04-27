@@ -15,21 +15,9 @@ struct user{
 	std::optional<std::string> name;
 };
 
-struct table_name{
-	const char* name;
-};
-static constexpr const char user_table_name[]{"user_table"};
-
-struct other_annotation{
-	int value;
-};
-
-struct column_name{
-	const char* name;
-};
-static constexpr const char id_column_name[]{"id"};
-static constexpr const char email_column_name[]{"mail"};
-static constexpr const char name_column_name[]{"name"};
+template<std::size_t N> struct table_name{ const char name[N]; };
+struct other_annotation{ int value; };
+template<std::size_t N> struct column_name{ const char name[N]; };
 
 template<> struct roy::provide_reflection<user>
 	: roy::reflection::for_type<user>
@@ -37,18 +25,18 @@ template<> struct roy::provide_reflection<user>
 		::with_fields<
 			roy::reflection::for_field<&user::id>
 				::with_auto_name
-				::with_annotation<column_name{id_column_name}>
+				::with_annotation<column_name{"id"}>
 				::result,
 			roy::reflection::for_field<&user::email>
 				::with_auto_name
-				::with_annotation<column_name{email_column_name}>
+				::with_annotation<column_name{"e-mail"}>
 				::result,
 			roy::reflection::for_field<&user::name>
 				::with_auto_name
-				::with_annotation<column_name{name_column_name}>
+				::with_annotation<column_name{"name"}>
 				::result
 		>
-		::with_annotation<table_name{user_table_name}>
+		::with_annotation<table_name{"user_table"}>
 		::with_annotation<other_annotation{3}>
 		::result{};
 
