@@ -352,12 +352,6 @@ namespace roy{
 	template<typename AnnotationType, auto FieldPtr>
 	inline constexpr auto annotation_of() noexcept
 		-> AnnotationType{
-		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
-		using field_reflection = roy::nth_field_reflection_of<
-			field_index,
-			roy::util::field_ptr_declaring_type_t<FieldPtr>
-		>;
-
 		return std::get<AnnotationType>(roy::annotations_of<FieldPtr>());
 	}
 
@@ -381,11 +375,6 @@ namespace roy{
 
 	template<template<typename...> typename AnnotationType, auto FieldPtr>
 	inline constexpr auto annotation_of() noexcept{
-		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
-		using field_reflection = roy::nth_field_reflection_of<
-			field_index,
-			roy::util::field_ptr_declaring_type_t<FieldPtr>
-		>;
 		static constexpr auto annotation_values{roy::annotations_of<FieldPtr>()};
 		static constexpr std::size_t annotation_index{
 			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
@@ -414,11 +403,6 @@ namespace roy{
 
 	template<template<auto...> typename AnnotationType, auto FieldPtr>
 	inline constexpr auto annotation_of() noexcept{
-		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
-		using field_reflection = roy::nth_field_reflection_of<
-			field_index,
-			roy::util::field_ptr_declaring_type_t<FieldPtr>
-		>;
 		static constexpr auto annotation_values{roy::annotations_of<FieldPtr>()};
 		static constexpr std::size_t annotation_index{
 			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()

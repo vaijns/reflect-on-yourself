@@ -133,7 +133,7 @@ std::string json_serialize(const T& t){
 	return s.str();
 }
 
-int main(int argc, char* argv[]){
+int main(int /*argc*/, char* /*argv*/[]){
 	std::println("{}", roy::reflection_of<user>::name());
 	std::println("{} (builtin: {})", roy::reflection_of<bool>::name(), roy::reflection_of<bool>::is_builtin_type());
 

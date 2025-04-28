@@ -9,3 +9,12 @@ target_link_libraries(demo.out
 	PRIVATE
 		reflect-on-yourself::reflect-on-yourself
 )
+
+if(NOT MSVC)
+	target_compile_options(demo.out
+		PRIVATE
+			-Wall
+			-Wextra
+			-pedantic
+	)
+endif()
