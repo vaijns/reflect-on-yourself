@@ -1306,94 +1306,88 @@ namespace roy::detail{
 	template<auto FieldPtr>
 	inline constexpr auto get_field_name_expected_string_view() noexcept
 		-> std::expected<std::string_view, std::variant<roy::detail::signature_parser::lexer_error, roy::detail::signature_parser::parser_error>>{
-		constexpr auto field_name{
-			roy::detail::signature_parser::parser::member_field_name(
-				roy::detail::get_member_field_name_signature<FieldPtr>()
-			)
-		};
-		return field_name;
+		return roy::detail::signature_parser::parser::member_field_name(
+			roy::detail::get_member_field_name_signature<FieldPtr>()
+		);
 	}
 
 	template<auto FunctionPtr>
 	inline constexpr auto get_function_name_expected_string_view() noexcept
 		-> std::expected<std::string_view, std::variant<roy::detail::signature_parser::lexer_error, roy::detail::signature_parser::parser_error>>{
-		constexpr auto function_name{
-			roy::detail::signature_parser::parser::member_function_name(
-				roy::detail::get_member_function_name_signature<FunctionPtr>()
-			)
-		};
-		return function_name;
+		return roy::detail::signature_parser::parser::member_function_name(
+			roy::detail::get_member_function_name_signature<FunctionPtr>()
+		);
 	}
 
 	template<typename T>
 	inline constexpr auto get_type_name_string_view() noexcept
 		-> std::string_view{
-		constexpr auto type_name{
-			roy::detail::get_type_name_expected_string_view<T>()
-		};
-		static_assert(type_name.has_value(), "parsing type name failed");
-		return type_name.value();
+		static_assert(roy::detail::get_type_name_expected_string_view<T>().has_value(), "parsing type name failed");
+		return roy::detail::get_type_name_expected_string_view<T>().value();
+	}
+
+	template<typename T>
+	inline constexpr auto get_type_name_size() noexcept
+		-> std::size_t{
+		return roy::detail::get_type_name_string_view<T>().size();
 	}
 
 	template<auto FieldPtr>
 	inline constexpr auto get_field_name_string_view() noexcept
 		-> std::string_view{
-		constexpr auto field_name{
-			roy::detail::get_field_name_expected_string_view<FieldPtr>()
-		};
-		static_assert(field_name.has_value(), "parsing field name failed");
-		return field_name.value();
+		static_assert(roy::detail::get_field_name_expected_string_view<FieldPtr>().has_value(), "parsing field name failed");
+		return roy::detail::get_field_name_expected_string_view<FieldPtr>().value();
+	}
+
+	template<auto FieldPtr>
+	inline constexpr auto get_field_name_size() noexcept
+		-> std::size_t{
+		return roy::detail::get_field_name_string_view<FieldPtr>().size();
 	}
 
 	template<auto FunctionPtr>
 	inline constexpr auto get_function_name_string_view() noexcept
 		-> std::string_view{
-		constexpr auto function_name{
-			roy::detail::get_function_name_expected_string_view<FunctionPtr>()
-		};
-		static_assert(function_name.has_value(), "parsing function name failed");
-		return function_name.value();
+		static_assert(roy::detail::get_function_name_expected_string_view<FunctionPtr>().has_value(), "parsing function name failed");
+		return roy::detail::get_function_name_expected_string_view<FunctionPtr>().value();
+	}
+
+	template<auto FunctionPtr>
+	inline constexpr auto get_function_name_size() noexcept
+		-> std::size_t{
+		return roy::detail::get_function_name_string_view<FunctionPtr>().size();
 	}
 }
 
 namespace roy::util{
 	template<typename T>
 	inline constexpr auto get_type_name() noexcept
-		-> roy::util::inplace_string<roy::detail::get_type_name_string_view<T>().size() + 1>{
-		static constexpr std::size_t size{roy::detail::get_type_name_string_view<T>().size() + 1};
-		static constexpr std::string_view string{roy::detail::get_type_name_string_view<T>()};
-		static constexpr std::array<char, size> data{
+		-> roy::util::inplace_string<roy::detail::get_type_name_size<T>() + 1>{
+		return {
 			[]<std::size_t... Is>(std::index_sequence<Is...>){
-				return std::array<char, size>{string[Is]..., '\0'};
-			}(std::make_index_sequence<size - 1>{})
+				return std::array<char, roy::detail::get_type_name_size<T>() + 1>{roy::detail::get_type_name_string_view<T>()[Is]..., '\0'};
+			}(std::make_index_sequence<roy::detail::get_type_name_size<T>()>{})
 		};
-		return roy::util::inplace_string<size>{data};
 	}
 
 	template<auto FieldPtr>
 	inline constexpr auto get_field_name() noexcept
-		-> roy::util::inplace_string<roy::detail::get_field_name_string_view<FieldPtr>().size() + 1>{
-		static constexpr std::size_t size{roy::detail::get_field_name_string_view<FieldPtr>().size() + 1};
-		static constexpr std::string_view string{roy::detail::get_field_name_string_view<FieldPtr>()};
-		static constexpr std::array<char, size> data{
+		-> roy::util::inplace_string<roy::detail::get_field_name_size<FieldPtr>() + 1>{
+		return {
 			[]<std::size_t... Is>(std::index_sequence<Is...>){
-				return std::array<char, size>{string[Is]..., '\0'};
-			}(std::make_index_sequence<size - 1>{})
+				return std::array<char, roy::detail::get_field_name_size<FieldPtr>() + 1>{roy::detail::get_field_name_string_view<FieldPtr>()[Is]..., '\0'};
+			}(std::make_index_sequence<roy::detail::get_field_name_size<FieldPtr>()>{})
 		};
-		return roy::util::inplace_string<size>{data};
 	}
 
 	template<auto FunctionPtr>
 	inline constexpr auto get_function_name() noexcept
-		-> roy::util::inplace_string<roy::detail::get_function_name_string_view<FunctionPtr>().size() + 1>{
-		static constexpr std::size_t size{roy::detail::get_function_name_string_view<FunctionPtr>().size() + 1};
-		static constexpr std::string_view string{roy::detail::get_function_name_string_view<FunctionPtr>()};
-		static constexpr std::array<char, size> data{
+		-> roy::util::inplace_string<roy::detail::get_function_name_size<FunctionPtr>() + 1>{
+		return {
 			[]<std::size_t... Is>(std::index_sequence<Is...>){
-				return std::array<char, size>{string[Is]..., '\0'};
-			}(std::make_index_sequence<size - 1>{})
+				return std::array<char, roy::detail::get_function_name_size<FunctionPtr>() + 1>{roy::detail::get_function_name_string_view<FunctionPtr>()[Is]..., '\0'};
+			}(std::make_index_sequence<roy::detail::get_function_name_size<FunctionPtr>() - 1>{})
 		};
-		return roy::util::inplace_string<size>{data};
 	}
 }
 

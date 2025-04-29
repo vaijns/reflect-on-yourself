@@ -101,54 +101,74 @@ namespace roy::detail{
 		return contains_value_templated_type_impl<SearchedType, TypeList>::value;
 	}
 
+	template<template<typename...> typename SearchedType, typename TypeList, std::size_t... Is>
+	inline constexpr auto get_type_templated_is_equal_array() noexcept
+		-> std::array<bool, sizeof...(Is)>{
+		return std::array<bool, sizeof...(Is)>{
+			roy::detail::is_type_templated_type_v<
+				SearchedType,
+				std::tuple_element_t<Is, TypeList>
+			>...
+		};
+	}
+
 	template<template<typename...> typename SearchedType, typename TypeList>
 	inline constexpr auto get_type_templated_type_index() noexcept
 		-> std::size_t{
-		static constexpr std::size_t match_index{
+		return{
 			[]<std::size_t... Is>(std::index_sequence<Is...>){
-				static constexpr std::array<bool, sizeof...(Is)> is_equal{
-					roy::detail::is_type_templated_type_v<
-						SearchedType,
-						std::tuple_element_t<Is, TypeList>
-					>...
-				};
-
-				static_assert((is_equal[Is] || ...), "Templated type not found.");
+				static_assert((roy::detail::get_type_templated_is_equal_array<SearchedType, TypeList, Is...>()[Is] || ...), "Templated type not found.");
 				for(std::size_t i{0}; i < sizeof...(Is); ++i){
-					if(is_equal[i])
+					if(roy::detail::get_type_templated_is_equal_array<SearchedType, TypeList, Is...>()[i])
 						return i;
 				}
 
 				std::unreachable();
 			}(std::make_index_sequence<std::tuple_size_v<TypeList>>{})
 		};
+	}
 
-		return match_index;
+	template<template<auto...> typename SearchedType, typename TypeList, std::size_t... Is>
+	inline constexpr auto get_value_templated_is_equal_array() noexcept
+		-> std::array<bool, sizeof...(Is)>{
+		return std::array<bool, sizeof...(Is)>{
+			roy::detail::is_value_templated_type_v<
+				SearchedType,
+				std::tuple_element_t<Is, TypeList>
+			>...
+		};
 	}
 
 	template<template<auto...> typename SearchedType, typename TypeList>
 	inline constexpr auto get_value_templated_type_index() noexcept
 		-> std::size_t{
-		static constexpr std::size_t match_index{
+		return {
 			[]<std::size_t... Is>(std::index_sequence<Is...>){
-				static constexpr std::array<bool, sizeof...(Is)> is_equal{
-					roy::detail::is_value_templated_type_v<
-						SearchedType,
-						std::tuple_element_t<Is, TypeList>
-					>...
-				};
-
-				static_assert((is_equal[Is] || ...), "Templated type not found.");
+				static_assert((roy::detail::get_value_templated_is_equal_array<SearchedType, TypeList, Is...>()[Is] || ...), "Templated type not found.");
 				for(std::size_t i{0}; i < sizeof...(Is); ++i){
-					if(is_equal[i])
+					if(roy::detail::get_value_templated_is_equal_array<SearchedType, TypeList, Is...>()[i])
 						return i;
 				}
 
 				std::unreachable();
 			}(std::make_index_sequence<std::tuple_size_v<TypeList>>{})
 		};
+	}
 
-		return match_index;
+	template<auto FieldPtr, std::size_t... Is>
+	inline constexpr auto get_field_ptrs_equal_array() noexcept
+		-> std::array<bool, sizeof...(Is)>{
+		return std::array<bool, sizeof...(Is)>{
+			roy::detail::field_ptrs_equal(
+				roy::util::nth_type<
+					Is,
+					typename roy::provide_reflection<
+						roy::util::field_ptr_declaring_type_t<FieldPtr>
+					>::type::fields::reflected_fields
+				>::type::field_ptr(),
+				FieldPtr
+			)...
+		};
 	}
 }
 
@@ -162,27 +182,17 @@ namespace roy{
 	template<auto FieldPtr>
 	inline constexpr auto index_of() noexcept
 		-> std::size_t{
-		using fields = roy::reflection_of<roy::util::field_ptr_declaring_type_t<FieldPtr>>::fields;
-		static constexpr std::size_t match_index{
+		return {
 			[]<std::size_t... Is>(std::index_sequence<Is...>){
-				static constexpr std::array<bool, sizeof...(Is)> is_equal{
-					roy::detail::field_ptrs_equal(
-						roy::util::nth_type<Is, typename fields::reflected_fields>::type::field_ptr(),
-						FieldPtr
-					)...
-				};
-
-				static_assert((is_equal[Is] || ...), "Field not found.");
+				static_assert((roy::detail::get_field_ptrs_equal_array<FieldPtr, Is...>()[Is] || ...), "Field not found.");
 				for(std::size_t i{0}; i < sizeof...(Is); ++i){
-					if(is_equal[i])
+					if(roy::detail::get_field_ptrs_equal_array<FieldPtr, Is...>()[i])
 						return i;
 				}
 
 				std::unreachable();
-			}(std::make_index_sequence<fields::size()>{})
+			}(std::make_index_sequence<roy::reflection_of<roy::util::field_ptr_declaring_type_t<FieldPtr>>::fields::size()>{})
 		};
-
-		return match_index;
 	}
 
 	template<typename ReflectableType>
@@ -247,13 +257,10 @@ namespace roy{
 
 	template<auto FieldPtr>
 	inline constexpr auto annotations_of() noexcept{
-		static constexpr std::size_t field_index{roy::index_of<FieldPtr>()};
-		using field_reflection = roy::nth_field_reflection_of<
-			field_index,
+		return roy::nth_field_reflection_of<
+			roy::index_of<FieldPtr>(),
 			roy::util::field_ptr_declaring_type_t<FieldPtr>
-		>;
-
-		return field_reflection::annotation_values;
+		>::annotation_values;
 	}
 
 	template<typename AnnotationType, std::size_t N, typename ReflectableType>
@@ -357,58 +364,44 @@ namespace roy{
 
 	template<template<typename...> typename AnnotationType, std::size_t N, typename ReflectableType>
 	inline constexpr auto nth_field_annotation_of() noexcept{
-		static constexpr auto annotation_values{roy::annotations_of_nth_field<N, ReflectableType>()};
-		static constexpr std::size_t annotation_index{
-			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
-		};
-		return std::get<annotation_index>(annotation_values);
+		return std::get<
+			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(roy::annotations_of_nth_field<N, ReflectableType>())>>()
+		>(roy::annotations_of_nth_field<N, ReflectableType>());
 	}
 
 	template<template<typename...> typename AnnotationType, typename ReflectableType>
 	inline constexpr auto annotation_of() noexcept{
-		static constexpr auto annotation_values{roy::annotations_of<ReflectableType>()};
-		static constexpr std::size_t annotation_index{
-			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
-		};
-		return std::get<annotation_index>(annotation_values);
+		return std::get<
+			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(roy::annotations_of<ReflectableType>())>>()
+		>(roy::annotations_of<ReflectableType>());
 	}
 
 	template<template<typename...> typename AnnotationType, auto FieldPtr>
 	inline constexpr auto annotation_of() noexcept{
-		static constexpr auto annotation_values{roy::annotations_of<FieldPtr>()};
-		static constexpr std::size_t annotation_index{
-			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
-		};
-
-		return std::get<annotation_index>(annotation_values);
+		return std::get<
+			roy::detail::get_type_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(roy::annotations_of<FieldPtr>())>>()
+		>(roy::annotations_of<FieldPtr>());
 	}
 
 	template<template<auto...> typename AnnotationType, std::size_t N, typename ReflectableType>
 	inline constexpr auto nth_field_annotation_of() noexcept{
-		static constexpr auto annotation_values{roy::annotations_of_nth_field<N, ReflectableType>()};
-		static constexpr std::size_t annotation_index{
-			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
-		};
-		return std::get<annotation_index>(annotation_values);
+		return std::get<
+			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(roy::annotations_of_nth_field<N, ReflectableType>())>>()
+		>(roy::annotations_of_nth_field<N, ReflectableType>());
 	}
 
 	template<template<auto...> typename AnnotationType, typename ReflectableType>
 	inline constexpr auto annotation_of() noexcept{
-		static constexpr auto annotation_values{roy::annotations_of<ReflectableType>()};
-		static constexpr std::size_t annotation_index{
-			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
-		};
-		return std::get<annotation_index>(annotation_values);
+		return std::get<
+			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(roy::annotations_of<ReflectableType>())>>()
+		>(roy::annotations_of<ReflectableType>());
 	}
 
 	template<template<auto...> typename AnnotationType, auto FieldPtr>
 	inline constexpr auto annotation_of() noexcept{
-		static constexpr auto annotation_values{roy::annotations_of<FieldPtr>()};
-		static constexpr std::size_t annotation_index{
-			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(annotation_values)>>()
-		};
-
-		return std::get<annotation_index>(annotation_values);
+		return std::get<
+			roy::detail::get_value_templated_type_index<AnnotationType, std::remove_cvref_t<decltype(roy::annotations_of<FieldPtr>())>>()
+		>(roy::annotations_of<FieldPtr>());
 	}
 }
 

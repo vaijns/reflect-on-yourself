@@ -119,15 +119,15 @@ namespace roy::util{
 	};
 
 	template<std::size_t N>
-	using inplace_string = basic_inplace_string<char, N>;
+	using inplace_string = basic_inplace_string<char, N, std::char_traits<char>>;
 	template<std::size_t N>
-	using winplace_string = basic_inplace_string<wchar_t, N>;
+	using winplace_string = basic_inplace_string<wchar_t, N, std::char_traits<wchar_t>>;
 	template<std::size_t N>
-	using u8inplace_string = basic_inplace_string<char8_t, N>;
+	using u8inplace_string = basic_inplace_string<char8_t, N, std::char_traits<char8_t>>;
 	template<std::size_t N>
-	using u16inplace_string = basic_inplace_string<char16_t, N>;
+	using u16inplace_string = basic_inplace_string<char16_t, N, std::char_traits<char16_t>>;
 	template<std::size_t N>
-	using u32inplace_string = basic_inplace_string<char32_t, N>;
+	using u32inplace_string = basic_inplace_string<char32_t, N, std::char_traits<char32_t>>;
 
 	template<std::size_t N, typename CharT, typename Traits = std::char_traits<CharT>>
 	constexpr std::basic_ostream<CharT, Traits>&
