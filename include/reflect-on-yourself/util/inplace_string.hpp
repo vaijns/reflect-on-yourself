@@ -364,16 +364,29 @@ namespace roy::util{
 	basic_inplace_string(const CharT (&str)[N]) -> basic_inplace_string<CharT, N, std::char_traits<CharT>>;
 }
 
-template<typename CharT, std::size_t N, typename Traits>
-struct std::formatter<roy::util::basic_inplace_string<CharT, N, Traits>>{
+template<typename CharT, std::size_t N, typename Traits, typename FormatterCharT>
+struct std::formatter<roy::util::basic_inplace_string<CharT, N, Traits>, FormatterCharT>{
+	static_assert(
+		std::is_same_v<CharT, FormatterCharT>,
+		"Format string of std::formatter requires the same char type as inplace_string in order to format it."
+	);
+
 	constexpr formatter() = default;
 
-	constexpr auto parse(std::format_parse_context& ctx){
+	constexpr auto parse(std::basic_format_parse_context<CharT>& ctx){
 		return ctx.begin();
 	}
 
-	constexpr auto format(const roy::util::basic_inplace_string<CharT, N, Traits>& str, std::format_context& ctx) const{
-		return std::format_to(ctx.out(), "{}", str.value);
+	template<typename OutputIt>
+	constexpr auto format(const roy::util::basic_inplace_string<CharT, N, Traits>& str, std::basic_format_context<OutputIt, CharT>& ctx) const{
+		if constexpr(std::is_same_v<std::remove_cvref_t<CharT>, char>)
+			return std::format_to(ctx.out(), "{}", str.value);
+		else if constexpr(std::is_same_v<std::remove_cvref_t<CharT>, wchar_t>)
+			return std::format_to(ctx.out(), L"{}", str.value);
+		else if constexpr(std::is_same_v<std::remove_cvref_t<CharT>, char8_t>)
+			return std::format_to(ctx.out(), u8"{}", str.value);
+		else
+			return std::format_to(ctx.out(), "{}", str.value);
 	}
 };
 #endif
