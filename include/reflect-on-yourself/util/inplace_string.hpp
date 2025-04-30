@@ -385,6 +385,10 @@ struct std::formatter<roy::util::basic_inplace_string<CharT, N, Traits>, Formatt
 			return std::format_to(ctx.out(), L"{}", str.value);
 		else if constexpr(std::is_same_v<std::remove_cvref_t<CharT>, char8_t>)
 			return std::format_to(ctx.out(), u8"{}", str.value);
+		else if constexpr(std::is_same_v<std::remove_cvref_t<CharT>, char16_t>)
+			return std::format_to(ctx.out(), u"{}", str.value);
+		else if constexpr(std::is_same_v<std::remove_cvref_t<CharT>, char32_t>)
+			return std::format_to(ctx.out(), U"{}", str.value);
 		else
 			return std::format_to(ctx.out(), "{}", str.value);
 	}
