@@ -13,7 +13,7 @@
 #include <vector>
 #include <span>
 #include <cmath>
-#include <print>
+#include <variant>
 
 #include "./inplace_string.hpp"
 #include "../builder/type_builder.hpp"
@@ -1269,8 +1269,10 @@ namespace roy::detail{
 			return "uint32";
 		else if constexpr (std::is_same_v<T, std::uint64_t>)
 			return "uint64";
+#ifdef __SIZEOF_INT128__
 		else if constexpr (std::is_same_v<T, __uint128_t>)
 			return "uint128";
+#endif
 		else if constexpr (std::is_same_v<T, std::int8_t>)
 			return "int8";
 		else if constexpr (std::is_same_v<T, std::int16_t>)
@@ -1279,8 +1281,10 @@ namespace roy::detail{
 			return "int32";
 		else if constexpr (std::is_same_v<T, std::int64_t>)
 			return "int64";
+#ifdef __SIZEOF_INT128__
 		else if constexpr (std::is_same_v<T, __int128_t>)
 			return "int128";
+#endif
 		else if constexpr (std::is_same_v<T, float>)
 			return "float32";
 		else if constexpr (std::is_same_v<T, double>)

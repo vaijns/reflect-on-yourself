@@ -9,6 +9,8 @@
 #include <sstream>
 #include <format>
 
+inline constexpr auto idk{roy::util::inplace_string{"abc"}};
+
 struct user{
 	std::uint64_t id;
 	std::string email;

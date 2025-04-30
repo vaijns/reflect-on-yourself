@@ -10,13 +10,17 @@ namespace roy::identifier{
 	ROY_MAKE_REFLECTION_IDENTIFIER(uint16);
 	ROY_MAKE_REFLECTION_IDENTIFIER(uint32);
 	ROY_MAKE_REFLECTION_IDENTIFIER(uint64);
+#ifdef __SIZEOF_INT128__
 	ROY_MAKE_REFLECTION_IDENTIFIER(uint128);
+#endif
 
 	ROY_MAKE_REFLECTION_IDENTIFIER(int8);
 	ROY_MAKE_REFLECTION_IDENTIFIER(int16);
 	ROY_MAKE_REFLECTION_IDENTIFIER(int32);
 	ROY_MAKE_REFLECTION_IDENTIFIER(int64);
+#ifdef __SIZEOF_INT128__
 	ROY_MAKE_REFLECTION_IDENTIFIER(int128);
+#endif
 }
 
 template<> struct roy::provide_reflection<std::uint8_t>
@@ -55,6 +59,7 @@ template<> struct roy::provide_reflection<std::uint64_t>
 		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
 
+#ifdef __SIZEOF_INT128__
 template<> struct roy::provide_reflection<__uint128_t>
 	: roy::reflection::for_type<__uint128_t>
 		::with_default_builders
@@ -63,6 +68,7 @@ template<> struct roy::provide_reflection<__uint128_t>
 		::with_identifier<roy::identifier::uint128>
 		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
+#endif
 
 // ---
 
@@ -102,6 +108,7 @@ template<> struct roy::provide_reflection<std::int64_t>
 		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
 
+#ifdef __SIZEOF_INT128__
 template<> struct roy::provide_reflection<__int128_t>
 	: roy::reflection::for_type<__int128_t>
 		::with_default_builders
@@ -110,5 +117,6 @@ template<> struct roy::provide_reflection<__int128_t>
 		::with_identifier<roy::identifier::int128>
 		::extend<roy::detail::builtin_type_extension_tag, roy::detail::builtin_type_extension, true>
 		::result{};
+#endif
 
 #endif
