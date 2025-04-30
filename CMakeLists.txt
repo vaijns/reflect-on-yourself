@@ -18,6 +18,31 @@ target_sources(reflect-on-yourself
 		BASE_DIRS ./include
 		FILES
 			include/reflect-on-yourself.hpp
+
+			include/reflect-on-yourself/reflection.hpp
+
+			include/reflect-on-yourself/util/inplace_string.hpp
+			include/reflect-on-yourself/util/type_wrapper.hpp
+			include/reflect-on-yourself/util/field_ptr_declaring_type.hpp
+			include/reflect-on-yourself/util/field_ptr_type.hpp
+			include/reflect-on-yourself/util/get_name.hpp
+
+			include/reflect-on-yourself/builder/builder.hpp
+			include/reflect-on-yourself/builder/type_builder.hpp
+			include/reflect-on-yourself/builder/field_builder.hpp
+			include/reflect-on-yourself/builder/extended_builder.hpp
+
+			include/reflect-on-yourself/extensions/name.hpp
+			include/reflect-on-yourself/extensions/identifier.hpp
+			include/reflect-on-yourself/extensions/fields.hpp
+			include/reflect-on-yourself/extensions/annotation.hpp
+			include/reflect-on-yourself/extensions/builders.hpp
+			include/reflect-on-yourself/extensions/default_builders.hpp
+
+			include/reflect-on-yourself/builtin_reflections/builtin_type_extension.hpp
+			include/reflect-on-yourself/builtin_reflections/bool_type.hpp
+			include/reflect-on-yourself/builtin_reflections/integer_types.hpp
+			include/reflect-on-yourself/builtin_reflections/floating_point_types.hpp
 	PRIVATE
 		src/reflect-on-yourself.cxx
 )
