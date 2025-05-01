@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+if(NOT TARGET reflect-on-yourself::reflect-on-yourself)
+	include(${CMAKE_CURRENT_LIST_DIR}/reflect-on-yourself.cmake)
+endif()
+
+check_required_components(reflect-on-yourself)
