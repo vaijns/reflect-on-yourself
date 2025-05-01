@@ -1,0 +1,50 @@
+name: msvc
+
+on:
+  pull_request:
+    branches:
+      - $default-branch
+  push:
+    branches:
+      - $default-branch
+      - feature/**
+    tags:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest]
+        build_type: [Release]
+        compiler: [cl]
+        compiler_version: [19]
+        cpp_std: [23]
+    name: "build msvc"
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: set strings
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: configure
+        run: >
+          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -S ${{ github.workspace }}
+
+      - name: build
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: execute
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        run: |
+          examples/demo/Release/demo.out.exe
+        shell: bash
