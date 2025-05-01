@@ -54,25 +54,54 @@ target_compile_features(reflect-on-yourself
 
 set_target_properties(reflect-on-yourself PROPERTIES
 	CXX_EXTENSIONS OFF
+	LINKER_LANGUAGE CXX
+)
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+	reflect-on-yourselfConfigVersion.cmake
+	VERSION ${PACKAGE_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+configure_package_config_file(
+	cmake/reflect-on-yourself-config.cmake.in
+	"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourselfConfig.cmake"
+	INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/reflect-on-yourself/cmake
 )
 
 install(
 	TARGETS reflect-on-yourself
 	EXPORT reflect-on-yourself-targets
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin
+	INCLUDES DESTINATION include
 	FILE_SET reflect_on_yourself_headers
 )
 
 install(
 	EXPORT reflect-on-yourself-targets
-	DESTINATION share/cmake/reflect-on-yourself
+	FILE reflect-on-yourself.cmake
+	#DESTINATION share/cmake/reflect-on-yourself
 	NAMESPACE reflect-on-yourself::
+	DESTINATION lib/cmake/reflect-on-yourself
 )
+
+#install(
+#	FILES
+#		./cmake/reflect-on-yourself-config.cmake
+#	DESTINATION
+#		share/cmake/reflect-on-yourself
+#)
 
 install(
 	FILES
-		./cmake/reflect-on-yourself-config.cmake
+		"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourselfConfig.cmake"
+		"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourselfConfigVersion.cmake"
 	DESTINATION
-		share/cmake/reflect-on-yourself
+		lib/cmake/reflect-on-yourself
 )
 
 add_subdirectory(test)
