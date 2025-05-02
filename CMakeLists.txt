@@ -59,16 +59,24 @@ set_target_properties(reflect-on-yourself PROPERTIES
 
 include(CMakePackageConfigHelpers)
 
+set(REFLECT_ON_YOURSELF_INC_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+set(REFLECT_ON_YOURSELF_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
+set(REFLECT_ON_YOURSELF_BIN_DIR ${CMAKE_INSTALL_BINDIR})
+set(REFLECT_ON_YOURSELF_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/reflect-on-yourself)
+set(REFLECT_ON_YOURSELF_PKGCONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+set(REFLECT_ON_YOURSELF_VERSION_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourself-version.cmake)
+set(REFLECT_ON_YOURSELF_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourself-config.cmake)
+
 write_basic_package_version_file(
-	"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourself-config-version.cmake"
+	${REFLECT_ON_YOURSELF_VERSION_CONFIG}
 	VERSION ${PACKAGE_VERSION}
 	COMPATIBILITY AnyNewerVersion
 )
 
 configure_package_config_file(
 	cmake/reflect-on-yourself-config.cmake.in
-	"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourself-config.cmake"
-	INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/reflect-on-yourself/cmake"
+	${REFLECT_ON_YOURSELF_CONFIG}
+	INSTALL_DESTINATION ${REFLECT_ON_YOURSELF_CMAKE_DIR}
 )
 
 install(
@@ -77,17 +85,15 @@ install(
 	EXPORT
 		reflect-on-yourself-targets
 	LIBRARY DESTINATION
-		lib
+		${REFLECT_ON_YOURSELF_LIB_DIR}
 	ARCHIVE DESTINATION
-		lib
-	RUNTIME DESTINATION
-		bin
+		${REFLECT_ON_YOURSELF_LIB_DIR}
 	INCLUDES DESTINATION
-		include
+		${REFLECT_ON_YOURSELF_INC_DIR}
+	RUNTIME DESTINATION
+		${REFLECT_ON_YOURSELF_BIN_DIR}
 	FILE_SET
 		reflect_on_yourself_headers
-	COMPONENT
-		reflect-on-yourself
 )
 
 install(
@@ -98,19 +104,15 @@ install(
 	NAMESPACE
 		reflect-on-yourself::
 	DESTINATION
-		"${CMAKE_INSTALL_DATADIR}/reflect-on-yourself/cmake"
-	COMPONENT
-		reflect-on-yourself
+		${REFLECT_ON_YOURSELF_CMAKE_DIR}
 )
 
 install(
 	FILES
-		"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourself-config.cmake"
-		"${CMAKE_CURRENT_BINARY_DIR}/reflect-on-yourself-config-version.cmake"
+		${REFLECT_ON_YOURSELF_CONFIG}
+		${REFLECT_ON_YOURSELF_VERSION_CONFIG}
 	DESTINATION
-		"${CMAKE_INSTALL_DATADIR}/reflect-on-yourself/cmake"
-	COMPONENT
-		reflect-on-yourself
+		${REFLECT_ON_YOURSELF_CMAKE_DIR}
 )
 
 add_subdirectory(test)
