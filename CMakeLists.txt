@@ -58,6 +58,7 @@ set_target_properties(reflect-on-yourself PROPERTIES
 )
 
 include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
 
 set(REFLECT_ON_YOURSELF_INC_DIR ${CMAKE_INSTALL_INCLUDEDIR})
 set(REFLECT_ON_YOURSELF_LIB_DIR ${CMAKE_INSTALL_LIBDIR})
