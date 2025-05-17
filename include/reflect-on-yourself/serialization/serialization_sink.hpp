@@ -701,7 +701,9 @@ namespace roy::serialization{
 			Sink::handle_type& handle,
 			char value
 		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, '"');
 			Sink::write(handle, value);
+			Sink::write(handle, '"');
 			return true;
 		}
 		template<roy::serialization::serialization_sink Sink>
@@ -746,7 +748,9 @@ namespace roy::serialization{
 			Sink::handle_type& handle,
 			std::basic_string_view<char> value
 		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, '"');
 			Sink::write(handle, value);
+			Sink::write(handle, '"');
 			return true;
 		}
 		template<roy::serialization::serialization_sink Sink>
