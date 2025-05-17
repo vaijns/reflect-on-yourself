@@ -14,10 +14,15 @@
 
 inline constexpr auto idk{roy::util::inplace_string{"abc"}};
 
+struct child_object{
+	std::string name;
+};
+
 struct user{
 	std::uint64_t id;
 	std::string email;
 	std::optional<std::string> name;
+	child_object child;
 };
 
 template<std::size_t N> struct table_name{ const char name[N]; };
@@ -28,6 +33,19 @@ template<std::size_t NA, std::size_t NB, std::size_t NC> struct multiple_strings
 	const char string_b[NB];
 	const char string_c[NC];
 };
+
+template<> struct roy::provide_reflection<child_object>
+	: roy::reflection::for_type<child_object>
+		::with_default_builders
+		::with_auto_name
+		::with_annotation<roy::serialization::strategy::as_object>
+		::with_fields<
+			roy::reflection::for_field<&child_object::name>
+				::with_default_builders
+				::with_auto_name
+				::result
+		>
+		::result{};
 
 template<> struct roy::provide_reflection<user>
 	: roy::reflection::for_type<user>
@@ -50,6 +68,10 @@ template<> struct roy::provide_reflection<user>
 				::with_auto_name
 				::with_annotation<column_name{"name"}>
 				::with_annotation<multiple_strings{"string_a", "another string", "string #c"}>
+				::result,
+			roy::reflection::for_field<&user::child>
+				::with_default_builders
+				::with_auto_name
 				::result
 		>
 		::with_annotation<table_name{"user_table"}>
@@ -84,13 +106,19 @@ int main(int /*argc*/, char* /*argv*/[]){
 	user user_a{
 		.id = 1,
 		.email = "email_a",
-		.name = std::nullopt
+		.name = std::nullopt,
+		.child = {
+			.name = "this is a child object"
+		}
 	};
 
 	const user user_b{
 		.id = 1,
 		.email = "email_b",
-		.name = std::nullopt
+		.name = std::nullopt,
+		.child = {
+			.name = "nice"
+		}
 	};
 
 	std::string& email_a{roy::nth_field_value<1>(user_a)};
@@ -148,22 +176,34 @@ int main(int /*argc*/, char* /*argv*/[]){
 			user{
 				.id = 0,
 				.email = "abc",
-				.name = "def"
+				.name = "def",
+				.child = {
+					.name = "child"
+				}
 			},
 			user{
 				.id = 1,
 				.email = "ghi",
-				.name = std::nullopt
+				.name = std::nullopt,
+				.child = {
+					.name = "abc"
+				}
 			},
 			user{
 				.id = 2,
 				.email = "jkl",
-				.name = "mno"
+				.name = "mno",
+				.child = {
+					.name = "def"
+				}
 			},
 			user{
 				.id = 3,
 				.email = "hello@world.com",
-				.name = std::nullopt
+				.name = std::nullopt,
+				.child = {
+					.name = "ghi"
+				}
 			}
 		},
 		roy::serialization::stringstream_sink::settings_type{},
