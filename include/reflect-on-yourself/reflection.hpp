@@ -176,6 +176,14 @@ namespace roy{
 	template<typename ReflectableType>
 	using reflection_of = roy::provide_reflection<ReflectableType>::type;
 
+	template<typename T>
+	concept reflectable = requires(T t){
+		typename roy::reflection_of<T>;
+	};
+
+	template<typename T>
+	concept builtin = roy::reflectable<T> and roy::reflection_of<T>::is_builtin_type();
+
 	template<typename ReflectableType>
 	using field_reflections_of = roy::reflection_of<ReflectableType>::fields::reflected_fields;
 

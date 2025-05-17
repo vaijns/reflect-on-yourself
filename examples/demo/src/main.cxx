@@ -8,6 +8,9 @@
 #include <ranges>
 #include <sstream>
 #include <format>
+#include <fstream>
+
+#include <reflect-on-yourself/serialization.hpp>
 
 inline constexpr auto idk{roy::util::inplace_string{"abc"}};
 
@@ -30,6 +33,7 @@ template<> struct roy::provide_reflection<user>
 	: roy::reflection::for_type<user>
 		::with_default_builders
 		::with_auto_name
+		::with_annotation<roy::serialization::strategy::as_object>
 		::with_fields<
 			roy::reflection::for_field<&user::id>
 				::with_default_builders
@@ -52,88 +56,26 @@ template<> struct roy::provide_reflection<user>
 		::with_annotation<other_annotation{3}>
 		::result{};
 
-template<typename T>
-concept has_reflection = requires(T t){
-	typename roy::reflection_of<T>;
-};
+template<typename T> struct roy::provide_reflection<std::vector<T>>
+	: roy::reflection::for_type<std::vector<T>>
+		::with_default_builders
+		::with_auto_name
+		::template with_annotation<roy::serialization::strategy::as_array>
+		::result{};
 
-template<typename T>
-concept reflection_of_builtin = has_reflection<T> && roy::reflection_of<T>::is_builtin_type();
+template<typename T> struct roy::provide_reflection<std::span<T>>
+	: roy::reflection::for_type<std::span<T>>
+		::with_default_builders
+		::with_auto_name
+		::template with_annotation<roy::serialization::strategy::as_array>
+		::result{};
 
-template<typename T> requires(has_reflection<T> && not reflection_of_builtin<T>)
-std::string json_serialize(const T& t);
-
-std::string json_serialize(const std::string& val){
-	return std::format("\"{}\"", val);
-}
-
-std::string json_serialize(std::string_view val){
-	return std::format("\"{}\"", val);
-}
-
-std::string json_serialize(std::integral auto val){
-	return std::to_string(val);
-}
-
-std::string json_serialize(std::floating_point auto val){
-	return std::to_string(val);
-}
-
-std::string json_serialize(bool val){
-	if(val)
-		return std::string{"true"};
-
-	return std::string{"false"};
-}
-
-template<typename T>
-std::string json_serialize(const std::optional<T>& t){
-	if(not t.has_value())
-		return std::string{"null"};
-
-	return json_serialize(t.value());
-}
-
-template<std::ranges::forward_range R>
-std::string json_serialize(R&& r){
-	std::stringstream s{};
-	s << '[';
-	bool is_first{true};
-	for(const auto& t : r){
-		if(not is_first)
-			s << ',';
-
-		s << json_serialize(t);
-
-		is_first = false;
-	}
-	s << ']';
-
-	return s.str();
-}
-
-template<typename T, std::size_t N>
-std::string json_serialize_nth_field(const T& t){
-	std::stringstream s{};
-	if constexpr (N > 0)
-		s << ',';
-
-	s << '"' << std::string{roy::nth_field_name_of<N, T>()} << "\":" << json_serialize(roy::nth_field_value<N>(t));
-	return s.str();
-}
-
-template<typename T> requires(has_reflection<T> && not reflection_of_builtin<T>)
-std::string json_serialize(const T& t){
-	std::stringstream s{};
-	s << '{';
-
-	[&s, &t]<std::size_t... Is>(std::index_sequence<Is...>){
-		s << (json_serialize_nth_field<T, Is>(t) + ...);
-	}(std::make_index_sequence<roy::field_count_of<T>()>{});
-
-	s << '}';
-	return s.str();
-}
+template<typename T, std::size_t N> struct roy::provide_reflection<std::array<T, N>>
+	: roy::reflection::for_type<std::array<T, N>>
+		::with_default_builders
+		::with_auto_name
+		::template with_annotation<roy::serialization::strategy::as_array>
+		::result{};
 
 int main(int /*argc*/, char* /*argv*/[]){
 	std::println("{}", roy::reflection_of<user>::name());
@@ -160,29 +102,6 @@ int main(int /*argc*/, char* /*argv*/[]){
 	user_a.email = "email_a_changed";
 	std::println("a: {}", email_a);
 
-	std::println("\"users\":{}",  json_serialize(std::vector{
-		user{
-			.id = 0,
-			.email = "abc",
-			.name = "def"
-		},
-		user{
-			.id = 1,
-			.email = "ghi",
-			.name = std::nullopt
-		},
-		user{
-			.id = 2,
-			.email = "jkl",
-			.name = "mno"
-		},
-		user{
-			.id = 3,
-			.email = "hello@world.com",
-			.name = std::nullopt
-		}
-	}));
-
 	std::println("table_name: {}", roy::annotation_of<table_name, user>().name);
 	std::println("other_annotation: {}", roy::annotation_of<other_annotation, user>().value);
 	std::println("column_name by index: {}", roy::nth_field_annotation_of<column_name, 1, user>().name);
@@ -205,6 +124,60 @@ int main(int /*argc*/, char* /*argv*/[]){
 
 	roy::reflection_of<std::uint64_t>::identifier::field<std::string> my_field{};
 	my_field.uint64 = "identifier_field";
+
+	std::println(
+		"serialized string: {}",
+		roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
+			"> hello world!!!!",
+			roy::serialization::stringstream_sink::settings_type{},
+			roy::serialization::json_settings{}
+		)
+	);
+
+	std::println(
+		"serialized user: {}",
+		roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
+			user_a,
+			roy::serialization::stringstream_sink::settings_type{},
+			roy::serialization::json_settings{}
+		)
+	);
+
+	std::println("serialized user list: {}",  roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
+		std::vector{
+			user{
+				.id = 0,
+				.email = "abc",
+				.name = "def"
+			},
+			user{
+				.id = 1,
+				.email = "ghi",
+				.name = std::nullopt
+			},
+			user{
+				.id = 2,
+				.email = "jkl",
+				.name = "mno"
+			},
+			user{
+				.id = 3,
+				.email = "hello@world.com",
+				.name = std::nullopt
+			}
+		},
+		roy::serialization::stringstream_sink::settings_type{},
+		roy::serialization::json_settings{}
+	));
+
+	std::println(
+		"user size: {}",
+		roy::serialization::serialize<roy::serialization::size_counter_sink, roy::serialization::json_serializer>(
+			user_a,
+			roy::serialization::size_counter_sink::settings_type{},
+			roy::serialization::json_settings{}
+		)
+	);
 
 	return 0;
 }
