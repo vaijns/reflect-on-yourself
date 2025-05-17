@@ -99,7 +99,25 @@ template<typename T, std::size_t N> struct roy::provide_reflection<std::array<T,
 		::template with_annotation<roy::serialization::strategy::as_array>
 		::result{};
 
-int main(int /*argc*/, char* /*argv*/[]){
+template<typename T>
+auto json_serialize(T&& data) -> std::string{
+	return roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
+		std::forward<T>(data),
+		roy::serialization::stringstream_sink::settings_type{},
+		roy::serialization::json_settings{}
+	);
+}
+
+template<typename T>
+auto xml_serialize(T&& data) -> std::string{
+	return roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::xml_serializer>(
+		std::forward<T>(data),
+		roy::serialization::stringstream_sink::settings_type{},
+		roy::serialization::xml_settings{}
+	);
+}
+
+auto main(int /*argc*/, char* /*argv*/[]) -> int{
 	std::println("{}", roy::reflection_of<user>::name());
 	std::println("{} (builtin: {})", roy::reflection_of<bool>::name(), roy::reflection_of<bool>::is_builtin_type());
 
@@ -153,62 +171,44 @@ int main(int /*argc*/, char* /*argv*/[]){
 	roy::reflection_of<std::uint64_t>::identifier::field<std::string> my_field{};
 	my_field.uint64 = "identifier_field";
 
-	std::println(
-		"serialized string: {}",
-		roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
-			"> hello world!!!!",
-			roy::serialization::stringstream_sink::settings_type{},
-			roy::serialization::json_settings{}
-		)
-	);
+	std::println("serialized string: {}", json_serialize("> hello world!!!!"));
 
-	std::println(
-		"serialized user: {}",
-		roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
-			user_a,
-			roy::serialization::stringstream_sink::settings_type{},
-			roy::serialization::json_settings{}
-		)
-	);
+	std::println("serialized user: {}", json_serialize(user_a));
 
-	std::println("serialized user list: {}",  roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::json_serializer>(
-		std::vector{
-			user{
-				.id = 0,
-				.email = "abc",
-				.name = "def",
-				.child = {
-					.name = "child"
-				}
-			},
-			user{
-				.id = 1,
-				.email = "ghi",
-				.name = std::nullopt,
-				.child = {
-					.name = "abc"
-				}
-			},
-			user{
-				.id = 2,
-				.email = "jkl",
-				.name = "mno",
-				.child = {
-					.name = "def"
-				}
-			},
-			user{
-				.id = 3,
-				.email = "hello@world.com",
-				.name = std::nullopt,
-				.child = {
-					.name = "ghi"
-				}
+	std::println("serialized user list: {}",  xml_serialize(std::vector{
+		user{
+			.id = 0,
+			.email = "abc",
+			.name = "def",
+			.child = {
+				.name = "child"
 			}
 		},
-		roy::serialization::stringstream_sink::settings_type{},
-		roy::serialization::json_settings{}
-	));
+		user{
+			.id = 1,
+			.email = "ghi",
+			.name = std::nullopt,
+			.child = {
+				.name = "abc"
+			}
+		},
+		user{
+			.id = 2,
+			.email = "jkl",
+			.name = "mno",
+			.child = {
+				.name = "def"
+			}
+		},
+		user{
+			.id = 3,
+			.email = "hello@world.com",
+			.name = std::nullopt,
+			.child = {
+				.name = "ghi"
+			}
+		}
+	}));
 
 	std::println(
 		"user size: {}",

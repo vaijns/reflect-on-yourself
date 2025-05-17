@@ -984,9 +984,321 @@ namespace roy::serialization{
 		}
 	};
 
+	struct xml_settings{};
+
+	class xml_serializer{
+	public:
+		using settings_type = roy::serialization::xml_settings;
+		struct state_type{};
+		using result_type = bool;
+		using error_type = std::string;
+		using creation_error_type = std::string;
+
+		template<roy::serialization::serialization_sink Sink>
+		using templated_result_type = result_type;
+
+		template<roy::serialization::serialization_sink Sink>
+		using templated_error_type = error_type;
+
+		static constexpr auto create(settings_type&& settings)
+			-> std::expected<state_type, creation_error_type>{
+			return state_type{};
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			char value
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, value);
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			wchar_t value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write wchar"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			char8_t value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write u8char"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			char16_t value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write u16char"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			char32_t value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write u32char"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::basic_string_view<char> value
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, value);
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::basic_string_view<wchar_t> value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write wstring"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::basic_string_view<char8_t> value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write u8string"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::basic_string_view<char16_t> value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write u16string"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::basic_string_view<char32_t> value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write u32string"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			roy::serialization::serialization_types::unit_t value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: write unit type"
+			return false;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::nullptr_t value
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, "null");
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::nullopt_t value
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, "null");
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink, roy::serialization::serialization_types::boolean Bool>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			Bool value
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, value ? "true" : "false");
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::byte value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: avoid allocations"
+			Sink::write(handle, std::to_string(static_cast<std::uint8_t>(value)));
+			return false;
+		}
+
+		template<roy::serialization::serialization_sink Sink, roy::serialization::serialization_types::integral I>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			I value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: avoid allocations"
+			if constexpr(not std::same_as<__uint128_t, I> && not std::same_as<__int128_t, I>)
+				Sink::write(handle, std::to_string(value));
+			return false;
+		}
+
+		template<roy::serialization::serialization_sink Sink, roy::serialization::serialization_types::floating_point F>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			F value
+		) -> std::expected<result_type, error_type>{
+			#warning "TODO: avoid allocations"
+			Sink::write(handle, std::to_string(value));
+			return false;
+		}
+
+		template<roy::serialization::serialization_sink Sink, typename Rep, typename Period>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::chrono::duration<Rep, Period> value
+		) -> std::expected<result_type, error_type>{
+			#warning write duration
+			return false;
+		}
+
+		template<roy::serialization::serialization_sink Sink, typename Clock, typename Duration>
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::chrono::time_point<Clock, Duration> value
+		) -> std::expected<result_type, error_type>{
+			#warning write time_point
+			return false;
+		}
+
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type ObjectStart>
+			requires(ObjectStart == roy::serialization::structural_type::object_start)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::string_view type_name,
+			std::size_t property_count
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, '<');
+			Sink::write(handle, type_name);
+			Sink::write(handle, '>');
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type ObjectEnd>
+			requires(ObjectEnd == roy::serialization::structural_type::object_end)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::string_view type_name,
+			std::size_t property_count
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, '<');
+			Sink::write(handle, '/');
+			Sink::write(handle, type_name);
+			Sink::write(handle, '>');
+			return true;
+		}
+
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type PropStart>
+			requires(PropStart == roy::serialization::structural_type::property_start)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::string_view type_name,
+			std::size_t property_count,
+			roy::serialization::detail::data_type property_type,
+			std::string_view property_name,
+			std::size_t property_index
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, '<');
+			Sink::write(handle, property_name);
+			Sink::write(handle, '>');
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type PropEnd>
+			requires(PropEnd == roy::serialization::structural_type::property_end)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			std::string_view type_name,
+			std::size_t property_count,
+			roy::serialization::detail::data_type property_type,
+			std::string_view property_name,
+			std::size_t property_index
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, '<');
+			Sink::write(handle, '/');
+			Sink::write(handle, property_name);
+			Sink::write(handle, '>');
+			return true;
+		}
+
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type ArrayStart>
+			requires(ArrayStart == roy::serialization::structural_type::array_start)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			roy::serialization::detail::data_type values_type,
+			std::size_t value_count
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, "<Array>");
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type ArrayEnd>
+			requires(ArrayEnd == roy::serialization::structural_type::array_end)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			roy::serialization::detail::data_type values_type,
+			std::size_t value_count
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, "</Array>");
+			return true;
+		}
+
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type ArrayValueStart>
+			requires(ArrayValueStart == roy::serialization::structural_type::array_value_start)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			roy::serialization::detail::data_type values_type,
+			std::size_t value_count,
+			std::size_t value_index
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, "<Value>");
+			return true;
+		}
+		template<roy::serialization::serialization_sink Sink, roy::serialization::structural_type ArrayValueEnd>
+			requires(ArrayValueEnd == roy::serialization::structural_type::array_value_end)
+		static constexpr auto serialize(
+			state_type& state,
+			Sink::handle_type& handle,
+			roy::serialization::detail::data_type values_type,
+			std::size_t value_count,
+			std::size_t value_index
+		) -> std::expected<result_type, error_type>{
+			Sink::write(handle, "</Value>");
+			return true;
+		}
+	};
+
 	static_assert(roy::serialization::serialization_sink<size_counter_sink>);
 	static_assert(roy::serialization::serialization_sink<stringstream_sink>);
 	static_assert(roy::serialization::serializer<json_serializer, stringstream_sink>);
+	static_assert(roy::serialization::serializer<xml_serializer, stringstream_sink>);
 }
 
 namespace roy::serialization::detail{
