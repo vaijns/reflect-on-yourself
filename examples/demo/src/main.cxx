@@ -135,8 +135,8 @@ auto xml_serialize(std::filesystem::path&& path, T&& data) -> void{
 		std::forward<T>(data),
 		std::filesystem::path{path},
 		roy::serialization::xml_settings{
-			.indent_char{'\t'},
-			.chars_per_indent{1}
+			.indent_char{' '},
+			.chars_per_indent{8}
 		}
 	);
 }

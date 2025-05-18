@@ -977,7 +977,8 @@ namespace roy::serialization{
 			state.indentation_level--;
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, '}');
@@ -997,7 +998,8 @@ namespace roy::serialization{
 		) -> std::expected<result_type, error_type>{
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, '"');
@@ -1050,7 +1052,8 @@ namespace roy::serialization{
 			state.indentation_level--;
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, ']');
@@ -1068,7 +1071,8 @@ namespace roy::serialization{
 		) -> std::expected<result_type, error_type>{
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			return true;
@@ -1313,7 +1317,8 @@ namespace roy::serialization{
 		) -> std::expected<result_type, error_type>{
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			state.indentation_level++;
@@ -1335,7 +1340,8 @@ namespace roy::serialization{
 			state.indentation_level--;
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, '<');
@@ -1360,7 +1366,8 @@ namespace roy::serialization{
 		) -> std::expected<result_type, error_type>{
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			state.indentation_level++;
@@ -1395,7 +1402,8 @@ namespace roy::serialization{
 				)
 			){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, '<');
@@ -1417,7 +1425,8 @@ namespace roy::serialization{
 		) -> std::expected<result_type, error_type>{
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			state.indentation_level++;
@@ -1437,7 +1446,8 @@ namespace roy::serialization{
 			state.indentation_level--;
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, "</Array>");
@@ -1457,7 +1467,8 @@ namespace roy::serialization{
 		) -> std::expected<result_type, error_type>{
 			if(state.chars_per_indent.has_value()){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			state.indentation_level++;
@@ -1488,7 +1499,8 @@ namespace roy::serialization{
 				)
 			){
 				for(std::size_t i{0}; i < state.indentation_level; ++i){
-					Sink::write(handle, state.indent_char);
+					for(std::size_t j{0}; j < state.chars_per_indent; ++j)
+						Sink::write(handle, state.indent_char);
 				}
 			}
 			Sink::write(handle, "</Value>");
