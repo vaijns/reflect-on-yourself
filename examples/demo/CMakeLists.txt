@@ -10,11 +10,11 @@ target_link_libraries(demo.out
 		reflect-on-yourself::reflect-on-yourself
 )
 
-if(NOT MSVC)
-	target_compile_options(demo.out
-		PRIVATE
-			-Wall
-			-Wextra
-			-pedantic
-	)
-endif()
+#if(NOT MSVC)
+#	target_compile_options(demo.out
+#		PRIVATE
+#			-Wall
+#			-Wextra
+#			-pedantic
+#	)
+#endif()

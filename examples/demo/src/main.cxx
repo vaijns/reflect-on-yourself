@@ -113,7 +113,10 @@ auto json_serialize(std::filesystem::path&& path, T&& data) -> void{
 	roy::serialization::serialize<roy::serialization::file_sink, roy::serialization::json_serializer>(
 		std::forward<T>(data),
 		std::filesystem::path{path},
-		roy::serialization::json_settings{}
+		roy::serialization::json_settings{
+			.indent_char{'\t'},
+			.chars_per_indent{1}
+		}
 	);
 }
 
@@ -131,7 +134,10 @@ auto xml_serialize(std::filesystem::path&& path, T&& data) -> void{
 	roy::serialization::serialize<roy::serialization::file_sink, roy::serialization::xml_serializer>(
 		std::forward<T>(data),
 		std::filesystem::path{path},
-		roy::serialization::xml_settings{}
+		roy::serialization::xml_settings{
+			.indent_char{'\t'},
+			.chars_per_indent{1}
+		}
 	);
 }
 
