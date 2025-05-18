@@ -1232,7 +1232,7 @@ namespace roy::serialization{
 			Sink::handle_type& handle,
 			std::nullptr_t value
 		) -> std::expected<result_type, error_type>{
-			Sink::write(handle, "null");
+			Sink::write(handle, "<null_value />");
 			return true;
 		}
 		template<roy::serialization::serialization_sink Sink>
@@ -1241,7 +1241,7 @@ namespace roy::serialization{
 			Sink::handle_type& handle,
 			std::nullopt_t value
 		) -> std::expected<result_type, error_type>{
-			Sink::write(handle, "null");
+			Sink::write(handle, "<null_value />");
 			return true;
 		}
 		template<roy::serialization::serialization_sink Sink, roy::serialization::serialization_types::boolean Bool>

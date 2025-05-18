@@ -166,6 +166,11 @@ namespace roy::serialization::detail{
 			roy::serialization::detail::binary_serializer::serialize_type_into<T>(buffer);
 		}
 		template<roy::serialization_strategy<roy::serialization::strategy::as_array> T>
+			// TODO: non-object types like std::optional<T> could cause problems because there is only one data_type written per array,
+			// not one per value but it can differ per value (nullopt or the value type).
+			// So array values must be serialized differently than property values, so memory size can still be kept relatively small
+			// (e.g. optional has an additional true/false value at the beginning for whether there is a value and in false case there is no value following)
+			requires roy::serialization_strategy<std::ranges::range_value_t<T>, roy::serialization::strategy::as_object>
 		static constexpr auto serialize_type_into(roy::serialization::detail::serialization_write_buffer& buffer, const T& data)
 			-> void{
 			roy::serialization::detail::binary_serializer::serialize_value_into(
