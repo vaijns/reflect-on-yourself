@@ -109,10 +109,28 @@ auto json_serialize(T&& data) -> std::string{
 }
 
 template<typename T>
+auto json_serialize(std::filesystem::path&& path, T&& data) -> void{
+	roy::serialization::serialize<roy::serialization::file_sink, roy::serialization::json_serializer>(
+		std::forward<T>(data),
+		std::filesystem::path{path},
+		roy::serialization::json_settings{}
+	);
+}
+
+template<typename T>
 auto xml_serialize(T&& data) -> std::string{
 	return roy::serialization::serialize<roy::serialization::stringstream_sink, roy::serialization::xml_serializer>(
 		std::forward<T>(data),
 		roy::serialization::stringstream_sink::settings_type{},
+		roy::serialization::xml_settings{}
+	);
+}
+
+template<typename T>
+auto xml_serialize(std::filesystem::path&& path, T&& data) -> void{
+	roy::serialization::serialize<roy::serialization::file_sink, roy::serialization::xml_serializer>(
+		std::forward<T>(data),
+		std::filesystem::path{path},
 		roy::serialization::xml_settings{}
 	);
 }
@@ -175,7 +193,7 @@ auto main(int /*argc*/, char* /*argv*/[]) -> int{
 
 	std::println("serialized user: {}", json_serialize(user_a));
 
-	std::println("serialized user list: {}",  xml_serialize(std::vector{
+	json_serialize(std::filesystem::path{"./output/test.json"}, std::vector{
 		user{
 			.id = 0,
 			.email = "abc",
@@ -208,7 +226,42 @@ auto main(int /*argc*/, char* /*argv*/[]) -> int{
 				.name = "ghi"
 			}
 		}
-	}));
+	});
+
+	xml_serialize(std::filesystem::path{"./output/test.xml"}, std::vector{
+		user{
+			.id = 0,
+			.email = "abc",
+			.name = "def",
+			.child = {
+				.name = "child"
+			}
+		},
+		user{
+			.id = 1,
+			.email = "ghi",
+			.name = std::nullopt,
+			.child = {
+				.name = "abc"
+			}
+		},
+		user{
+			.id = 2,
+			.email = "jkl",
+			.name = "mno",
+			.child = {
+				.name = "def"
+			}
+		},
+		user{
+			.id = 3,
+			.email = "hello@world.com",
+			.name = std::nullopt,
+			.child = {
+				.name = "ghi"
+			}
+		}
+	});
 
 	std::println(
 		"user size: {}",

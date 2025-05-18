@@ -12,6 +12,7 @@
 #include <string>
 #include <iostream>
 #include <chrono>
+#include <fstream>
 #include <filesystem>
 #include <print>
 
@@ -46,6 +47,7 @@ namespace roy::serialization::serialization_types{
 	using nanoseconds_timestamp = std::chrono::time_point<timestamp_clock, duration_nanoseconds>;
 
 	enum struct unit_t;
+	inline constexpr roy::serialization::serialization_types::unit_t unit{};
 
 	template<typename T>
 	concept boolean = std::same_as<std::remove_cv_t<T>, bool>;
@@ -125,14 +127,7 @@ namespace roy::serialization{
 
 		{ T::write(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>(), std::declval<typename T::char_type>()) }
 			-> std::convertible_to<std::expected<typename T::write_result_type, typename T::error_type>>;
-		{ T::write(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>(), std::declval<std::basic_string_view<typename T::char_type>>()) }
-			-> std::convertible_to<std::expected<typename T::write_result_type, typename T::error_type>>;
 		{ T::write(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>(), std::declval<std::span<typename T::char_type>>()) }
-			-> std::convertible_to<std::expected<typename T::write_result_type, typename T::error_type>>;
-
-		{ T::write(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>(), std::declval<std::byte>()) }
-			-> std::convertible_to<std::expected<typename T::write_result_type, typename T::error_type>>;
-		{ T::write(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>(), std::declval<std::span<std::byte>>()) }
 			-> std::convertible_to<std::expected<typename T::write_result_type, typename T::error_type>>;
 
 		/*{ T::close(std::declval<std::add_rvalue_reference_t<typename T::handle_type>>()) }
@@ -145,7 +140,10 @@ namespace roy::serialization{
 
 		{ T::empty_result(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>()) }
 			-> std::convertible_to<typename T::result_type>;
-	};
+	} and (not roy::serialization::serialization_types::character<typename T::char_type> or requires (T t){
+		{ T::write(std::declval<std::add_lvalue_reference_t<typename T::handle_type>>(), std::declval<std::basic_string_view<typename T::char_type>>()) }
+			-> std::convertible_to<std::expected<typename T::write_result_type, typename T::error_type>>;
+	});
 
 	enum struct structural_type{
 		object_start,
@@ -160,6 +158,8 @@ namespace roy::serialization{
 
 	template<typename T, typename Sink>
 	concept serializer = requires(T t){
+		typename T::char_type;
+
 		typename T::template templated_result_type<Sink>;
 		typename std::formatter<typename T::template templated_result_type<Sink>, char>;
 		{ std::format("{}", std::declval<typename T::template templated_result_type<Sink>>()) }
@@ -561,7 +561,7 @@ namespace roy::serialization{
 			std::declval<std::size_t>(), // value count
 			std::declval<std::size_t>()) // value index
 		} -> std::convertible_to<std::expected<typename T::template templated_result_type<Sink>, typename T::template templated_error_type<Sink>>>;
-	};
+	} and roy::serialization::serialization_sink<Sink> and std::same_as<typename Sink::char_type, typename T::char_type>;
 
 	class stringstream_sink{
 	public:
@@ -586,27 +586,13 @@ namespace roy::serialization{
 			return write_result_type{handle};
 		}
 
-		static constexpr auto write(handle_type& handle, std::string_view value) -> std::expected<write_result_type, error_type>{
-			handle << value;
-			return write_result_type{handle};
-		}
-
 		static constexpr auto write(handle_type& handle, std::span<char> value) -> std::expected<write_result_type, error_type>{
 			handle << std::string_view{value.data(), value.size()};
 			return write_result_type{handle};
 		}
 
-		static constexpr auto write(handle_type& handle, std::byte value) -> std::expected<write_result_type, error_type>{
-			#warning "TODO: write byte"
-			handle << static_cast<std::uint8_t>(value);
-			return write_result_type{handle};
-		}
-
-		static constexpr auto write(handle_type& handle, std::span<std::byte> value) -> std::expected<write_result_type, error_type>{
-			#warning "TODO: write bytes"
-			for(std::byte b : value){
-				handle << static_cast<std::uint8_t>(b);
-			}
+		static constexpr auto write(handle_type& handle, std::basic_string_view<char> value) -> std::expected<write_result_type, error_type>{
+			handle << value;
 			return write_result_type{handle};
 		}
 
@@ -616,6 +602,50 @@ namespace roy::serialization{
 
 		static constexpr auto empty_result(handle_type& handle) -> result_type{
 			return std::string{};
+		}
+	};
+
+	class file_sink{
+	public:
+		using settings_type = std::filesystem::path;
+		using handle_type = std::fstream;
+		using char_type = char;
+		using result_type = roy::serialization::serialization_types::unit_t;
+		struct write_result_type{
+			handle_type& handle;
+		};
+
+		using error_type = std::string;
+		using opening_error_type = std::string;
+		using closing_error_type = std::string;
+
+		static constexpr auto open(settings_type&& path) -> std::expected<handle_type, opening_error_type>{
+			return handle_type{path, std::ios::out};
+		}
+
+		static constexpr auto write(handle_type& handle, char value) -> std::expected<write_result_type, error_type>{
+			handle << value;
+			return write_result_type{handle};
+		}
+
+		static constexpr auto write(handle_type& handle, std::span<char> value) -> std::expected<write_result_type, error_type>{
+			handle << std::string_view{value.data(), value.size()};
+			return write_result_type{handle};
+		}
+
+		static constexpr auto write(handle_type& handle, std::basic_string_view<char> value) -> std::expected<write_result_type, error_type>{
+			handle << value;
+			return write_result_type{handle};
+		}
+
+		static constexpr auto close(handle_type& handle) -> std::expected<result_type, closing_error_type>{
+			handle.close();
+			return roy::serialization::serialization_types::unit;
+		}
+
+		static constexpr auto empty_result(handle_type& handle) -> result_type{
+			handle.close();
+			return roy::serialization::serialization_types::unit;
 		}
 	};
 
@@ -646,22 +676,12 @@ namespace roy::serialization{
 			return write_result_type{handle};
 		}
 
-		static constexpr auto write(handle_type& handle, std::string_view value) -> std::expected<write_result_type, error_type>{
-			handle.current_size += value.size();
-			return write_result_type{handle};
-		}
-
 		static constexpr auto write(handle_type& handle, std::span<char> value) -> std::expected<write_result_type, error_type>{
 			handle.current_size += value.size();
 			return write_result_type{handle};
 		}
 
-		static constexpr auto write(handle_type& handle, std::byte) -> std::expected<write_result_type, error_type>{
-			handle.current_size += 1;
-			return write_result_type{handle};
-		}
-
-		static constexpr auto write(handle_type& handle, std::span<std::byte> value) -> std::expected<write_result_type, error_type>{
+		static constexpr auto write(handle_type& handle, std::basic_string_view<char> value) -> std::expected<write_result_type, error_type>{
 			handle.current_size += value.size();
 			return write_result_type{handle};
 		}
@@ -675,10 +695,52 @@ namespace roy::serialization{
 		}
 	};
 
+	class binary_file_sink{
+	public:
+		using settings_type = std::filesystem::path;
+		using handle_type = std::fstream;
+		using char_type = std::byte;
+		using result_type = roy::serialization::serialization_types::unit_t;
+		struct write_result_type{
+			handle_type& handle;
+		};
+
+		using error_type = std::string;
+		using opening_error_type = std::string;
+		using closing_error_type = std::string;
+
+		static constexpr auto open(settings_type&& path) -> std::expected<handle_type, opening_error_type>{
+			return handle_type{path, std::ios::out | std::ios::binary};
+		}
+
+		static constexpr auto write(handle_type& handle, std::byte value) -> std::expected<write_result_type, error_type>{
+			handle << static_cast<std::uint8_t>(value);
+			return write_result_type{handle};
+		}
+
+		static constexpr auto write(handle_type& handle, std::span<std::byte> value) -> std::expected<write_result_type, error_type>{
+			for(std::byte b : value){
+				handle << static_cast<std::uint8_t>(b);
+			}
+			return write_result_type{handle};
+		}
+
+		static constexpr auto close(handle_type& handle) -> std::expected<result_type, closing_error_type>{
+			handle.close();
+			return roy::serialization::serialization_types::unit;
+		}
+
+		static constexpr auto empty_result(handle_type& handle) -> result_type{
+			handle.close();
+			return roy::serialization::serialization_types::unit;
+		}
+	};
+
 	struct json_settings{};
 
 	class json_serializer{
 	public:
+		using char_type = char;
 		using settings_type = roy::serialization::json_settings;
 		struct state_type{};
 		using result_type = bool;
@@ -988,6 +1050,7 @@ namespace roy::serialization{
 
 	class xml_serializer{
 	public:
+		using char_type = char;
 		using settings_type = roy::serialization::xml_settings;
 		struct state_type{};
 		using result_type = bool;
@@ -1297,6 +1360,8 @@ namespace roy::serialization{
 
 	static_assert(roy::serialization::serialization_sink<size_counter_sink>);
 	static_assert(roy::serialization::serialization_sink<stringstream_sink>);
+	static_assert(roy::serialization::serialization_sink<file_sink>);
+	static_assert(roy::serialization::serialization_sink<binary_file_sink>);
 	static_assert(roy::serialization::serializer<json_serializer, stringstream_sink>);
 	static_assert(roy::serialization::serializer<xml_serializer, stringstream_sink>);
 }
